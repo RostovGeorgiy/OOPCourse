@@ -37,7 +37,7 @@ public class Range {
         double maxFrom = Math.max(from, range.from);
         double minTo = Math.min(to, range.to);
 
-        if (range.to <= from || to <= range.from) {
+        if (minTo <= maxFrom) {
             return null;
         }
 
@@ -51,32 +51,38 @@ public class Range {
         double maxFrom = Math.max(from, range.from);
         double maxTo = Math.max(to, range.to);
 
-        if (to < range.from || range.to < from) {
+        if (minTo < maxFrom) {
             return new Range[]{
                     new Range(minFrom, minTo),
                     new Range(maxFrom, maxTo)};
         }
 
-        return new Range[]{new Range(Math.min(from, range.from), Math.max(to, range.to))};
+        return new Range[]{
+                new Range(Math.min(from, range.from), Math.max(to, range.to))};
     }
 
     public Range[] getDifference(Range range) {
-        if (range.from > from && range.to >= to) {
-            return new Range[]{new Range(from, range.from)};
+        if (range.from >= to || range.to <= from) {
+            return new Range[]{
+                    new Range(from, to)};
         }
 
-        if (range.from <= from && to > range.to) {
-            return new Range[]{new Range(range.to, to)};
-        }
-
-        if (range.from > from && range.to < to) {
-            return new Range[]{new Range(from, range.from), new Range(range.to, to)};
-        }
-
-        if (from >= range.from && to <= range.to) {
+        if (range.from <= from && range.to >= to) {
             return new Range[]{};
         }
 
-        return new Range[]{new Range(from, to)};
+        if (range.to >= to) {
+            return new Range[]{
+                    new Range(from, range.from)};
+        }
+
+        if (range.from <= from) {
+            return new Range[]{
+                    new Range(range.to, to)};
+        }
+
+        return new Range[]{
+                new Range(from, range.from),
+                new Range(range.to, to)};
     }
 }
