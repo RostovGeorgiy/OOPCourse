@@ -9,20 +9,20 @@ public class Range {
         this.to = to;
     }
 
-    public void setFrom(double from) {
-        this.from = from;
-    }
-
     public double getFrom() {
         return from;
     }
 
-    public void setTo(double to) {
-        this.to = to;
+    public void setFrom(double from) {
+        this.from = from;
     }
 
     public double getTo() {
         return to;
+    }
+
+    public void setTo(double to) {
+        this.to = to;
     }
 
     public double getLength() {
@@ -33,42 +33,47 @@ public class Range {
         return number >= from && number <= to;
     }
 
-    public Range getIntersection(Range range2) {
-        double range2From = range2.getFrom();
-        double range2To = range2.getTo();
+    public Range getIntersection(Range range) {
+        double maxFrom = Math.max(from, range.from);
+        double minTo = Math.min(to, range.to);
 
-        if (range2To <= from || to <= range2From || (to == range2From || range2To == from)) {
+        if (range.to <= from || to <= range.from) {
             return null;
         }
 
-        return new Range(Math.max(from, range2From), Math.min(to, range2To));
+        return new Range(maxFrom, minTo);
     }
 
-    public Range[] getUnion(Range range2) {
-        double range2From = range2.getFrom();
-        double range2To = range2.getTo();
+    public Range[] getUnion(Range range) {
+        double minFrom = Math.min(from, range.from);
+        double minTo = Math.min(to, range.to);
 
-        if (to < range2From || range2To < from) {
-            return new Range[]{new Range(Math.min(from, range2From), Math.min(to, range2To)),
-                    new Range(Math.max(from, range2From), Math.max(to, range2To))};
+        double maxFrom = Math.max(from, range.from);
+        double maxTo = Math.max(to, range.to);
+
+        if (to < range.from || range.to < from) {
+            return new Range[]{
+                    new Range(minFrom, minTo),
+                    new Range(maxFrom, maxTo)};
         }
 
-        return new Range[]{new Range(Math.min(from, range2From), Math.max(to, range2To))};
+        return new Range[]{new Range(Math.min(from, range.from), Math.max(to, range.to))};
     }
 
-    public Range[] getDifference(Range range2) {
-        double range2From = range2.getFrom();
-        double range2To = range2.getTo();
+    public Range[] getDifference(Range range) {
+        if (range.from > from && range.to >= to) {
+            return new Range[]{new Range(from, range.from)};
+        }
 
-        if (to < range2From || range2To < from) {
-            return new Range[]{new Range(from, to)};
-        } else if (from < range2From && to >= range2From) {
-            return new Range[]{new Range(from, range2From)};
-        } else if (range2From <= from && to > range2To) {
-            return new Range[]{new Range(range2To, to)};
-        } else if (range2From > from && range2To < to) {
-            return new Range[]{new Range(from, range2From), new Range(range2To, to)};
-        } else if (from > range2From && to < range2To) {
+        if (range.from <= from && to > range.to) {
+            return new Range[]{new Range(range.to, to)};
+        }
+
+        if (range.from > from && range.to < to) {
+            return new Range[]{new Range(from, range.from), new Range(range.to, to)};
+        }
+
+        if (from >= range.from && to <= range.to) {
             return new Range[]{};
         }
 
