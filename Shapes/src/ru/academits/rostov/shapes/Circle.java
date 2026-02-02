@@ -1,10 +1,17 @@
 package ru.academits.rostov.shapes;
 
 public class Circle implements Shape {
-
-    double radius;
+    private double radius;
 
     public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
         this.radius = radius;
     }
 
@@ -20,13 +27,14 @@ public class Circle implements Shape {
 
     @Override
     public double getArea() {
-        return Math.PI * Math.pow(radius, 2);
+        return Math.PI * radius * radius;
     }
 
     @Override
     public double getPerimeter() {
         return Math.PI * radius * 2;
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -40,7 +48,7 @@ public class Circle implements Shape {
 
         Circle circle = (Circle) o;
 
-        return this.radius == circle.radius;
+        return radius == circle.radius;
     }
 
     @Override
@@ -55,7 +63,6 @@ public class Circle implements Shape {
 
     @Override
     public String toString() {
-        return String.format("Circle with height = %f, width = %f, area = %f, perimeter = %f%n",
-                getHeight(), getWidth(), getArea(), getPerimeter());
+        return String.format("Circle with radius = %f", getRadius());
     }
 }

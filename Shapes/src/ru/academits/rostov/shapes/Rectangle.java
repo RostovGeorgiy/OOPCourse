@@ -1,9 +1,8 @@
 package ru.academits.rostov.shapes;
 
 public class Rectangle implements Shape {
-
-    double width;
-    double height;
+    private double width;
+    private double height;
 
     public Rectangle(double width, double height) {
         this.width = width;
@@ -15,9 +14,17 @@ public class Rectangle implements Shape {
         return width;
     }
 
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
     @Override
     public double getHeight() {
         return height;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
     }
 
     @Override
@@ -42,7 +49,7 @@ public class Rectangle implements Shape {
 
         Rectangle rectangle = (Rectangle) o;
 
-        return this.width == rectangle.width && this.height == rectangle.height;
+        return width == rectangle.width && height == rectangle.height;
     }
 
     @Override
@@ -52,12 +59,13 @@ public class Rectangle implements Shape {
 
         hash = prime * hash + Double.hashCode(width);
         hash = prime * hash + Double.hashCode(height);
+
         return hash;
     }
 
     @Override
     public String toString() {
-        return String.format("Rectangle with height = %f, width = %f, area = %f, perimeter = %f%n",
-                getHeight(), getWidth(), getArea(), getPerimeter());
+        return String.format("Rectangle with height = %f, width = %f",
+                getHeight(), getWidth());
     }
 }

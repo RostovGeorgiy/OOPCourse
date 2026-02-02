@@ -1,10 +1,17 @@
 package ru.academits.rostov.shapes;
 
 public class Square implements Shape {
-
-    double side;
+    private double side;
 
     public Square(double side) {
+        this.side = side;
+    }
+
+    public double getSide() {
+        return side;
+    }
+
+    public void setSide(double side) {
         this.side = side;
     }
 
@@ -40,7 +47,7 @@ public class Square implements Shape {
 
         Square square = (Square) o;
 
-        return this.side == square.side;
+        return side == square.side;
     }
 
     @Override
@@ -55,7 +62,6 @@ public class Square implements Shape {
 
     @Override
     public String toString() {
-        return String.format("Square with height = %f, width = %f, area = %f, perimeter = %f%n",
-                getHeight(), getWidth(), getArea(), getPerimeter());
+        return String.format("Square with side = %f", getSide());
     }
 }
