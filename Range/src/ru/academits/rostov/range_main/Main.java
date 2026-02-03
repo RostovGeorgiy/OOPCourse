@@ -47,7 +47,7 @@ public class Main {
         } else if (difference.length == 1) {
             System.out.printf("%f - %f%n", difference[0].getFrom(), difference[0].getTo());
         } else {
-            System.out.println("Разность равна 0");
+            System.out.println("Разность пустая");
         }
     }
 }
