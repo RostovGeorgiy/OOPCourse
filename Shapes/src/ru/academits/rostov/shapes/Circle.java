@@ -63,6 +63,6 @@ public class Circle implements Shape {
 
     @Override
     public String toString() {
-        return String.format("Circle with radius = %f", getRadius());
+        return String.format("Circle with radius = %f", radius);
     }
 }

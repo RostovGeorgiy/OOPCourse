@@ -87,7 +87,7 @@ public class Triangle implements Shape {
     public double getArea() {
         double[] sidesLengths = getSidesLengths();
 
-        double halfPerimeter = (sidesLengths[0] + sidesLengths[2] + sidesLengths[2]) / 2;
+        double halfPerimeter = getPerimeter() / 2;
 
         return Math.sqrt(halfPerimeter * (halfPerimeter - sidesLengths[0]) * (halfPerimeter - sidesLengths[1]) * (halfPerimeter - sidesLengths[2]));
     }
@@ -133,7 +133,7 @@ public class Triangle implements Shape {
 
     @Override
     public String toString() {
-        return String.format("Triangle with coodrinates: x1 = %f, y1 = %f, x2 = %f, y2 = %f, x3 = %f, y3 = %f",
-                getX1(), getY1(), getX2(), getY2(), getX3(), getY3());
+        return String.format("Triangle with coordinates: x1 = %f, y1 = %f, x2 = %f, y2 = %f, x3 = %f, y3 = %f",
+                x1, y1, x2, y2, x3, y3);
     }
 }

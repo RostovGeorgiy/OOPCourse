@@ -66,6 +66,6 @@ public class Rectangle implements Shape {
     @Override
     public String toString() {
         return String.format("Rectangle with height = %f, width = %f",
-                getHeight(), getWidth());
+                height, width);
     }
 }
