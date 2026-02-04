@@ -65,38 +65,38 @@ public class Triangle implements Shape {
         this.y3 = y3;
     }
 
+    private double getLength(double coordinate1, double coordinate2, double coordinate3) {
+        return Math.max(Math.max(coordinate1, coordinate2), coordinate3) -
+                Math.min(Math.min(coordinate1, coordinate2), coordinate3);
+    }
+
     @Override
     public double getWidth() {
-        return Math.max(Math.max(x1, x2), x3) - Math.min(Math.min(x1, x2), x3);
+        return getLength(x1, x2, x3);
     }
 
     @Override
     public double getHeight() {
-        return Math.max(Math.max(y1, y2), y3) - Math.min(Math.min(y1, y2), y3);
-    }
-
-    private double[] getSidesLengths() {
-        double side1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-        double side2 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2));
-        double side3 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2));
-
-        return new double[]{side1, side2, side3};
+        return getLength(y1, y2, y3);
     }
 
     @Override
     public double getArea() {
-        double[] sidesLengths = getSidesLengths();
-
-        double halfPerimeter = getPerimeter() / 2;
-
-        return Math.sqrt(halfPerimeter * (halfPerimeter - sidesLengths[0]) * (halfPerimeter - sidesLengths[1]) * (halfPerimeter - sidesLengths[2]));
+        return getWidth() * getHeight() / 2;
     }
+
+    /*private double getLength(double coordinate1, double coordinate2, double coordinate3, double coordinate4) {
+        return Math.sqrt(Math.pow(coordinate1 - coordinate2, 2) + Math.pow(coordinate3 - coordinate4, 2));
+    }
+    */
 
     @Override
     public double getPerimeter() {
-        double[] sidesLengths = getSidesLengths();
+        double side1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        double side2 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2));
+        double side3 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2));
 
-        return sidesLengths[0] + sidesLengths[1] + sidesLengths[2];
+        return side1 + side2 + side3;
     }
 
     @Override

@@ -35,7 +35,6 @@ public class Circle implements Shape {
         return Math.PI * radius * 2;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (o == this) {
