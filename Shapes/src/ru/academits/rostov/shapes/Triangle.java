@@ -65,7 +65,7 @@ public class Triangle implements Shape {
         this.y3 = y3;
     }
 
-    private double getLength(double coordinate1, double coordinate2, double coordinate3) {
+    private static double getLength(double coordinate1, double coordinate2, double coordinate3) {
         return Math.max(Math.max(coordinate1, coordinate2), coordinate3) -
                 Math.min(Math.min(coordinate1, coordinate2), coordinate3);
     }
@@ -85,18 +85,13 @@ public class Triangle implements Shape {
         return getWidth() * getHeight() / 2;
     }
 
-    /*private double getLength(double coordinate1, double coordinate2, double coordinate3, double coordinate4) {
-        return Math.sqrt(Math.pow(coordinate1 - coordinate2, 2) + Math.pow(coordinate3 - coordinate4, 2));
+    private static double getSideLength(double x, double x1, double y, double y1) {
+        return Math.sqrt(Math.pow(x - x1, 2) + Math.pow(y - y1, 2));
     }
-    */
 
     @Override
     public double getPerimeter() {
-        double side1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-        double side2 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2));
-        double side3 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2));
-
-        return side1 + side2 + side3;
+        return getSideLength(x2, x1, y2, y1) + getSideLength(x3, x2, y3, y2) + getSideLength(x3, x1, y3, y1);
     }
 
     @Override
