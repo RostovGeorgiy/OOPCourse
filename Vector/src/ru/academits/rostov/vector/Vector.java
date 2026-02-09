@@ -18,7 +18,6 @@ public class Vector {
     }
 
     public Vector(double[] components) {
-
         if (components.length == 0) {
             throw new IllegalArgumentException("Vector size must be >= 0. Current size: 0");
         }
@@ -26,12 +25,12 @@ public class Vector {
         this.components = Arrays.copyOf(components, components.length);
     }
 
-    public Vector(int size, double[] components) {
+    public Vector(int size, double[] inputComponents) {
         if (size <= 0) {
             throw new IllegalArgumentException("Vector size must be >= 0. Current size: " + size);
         }
 
-        this.components = Arrays.copyOf(components, size);
+        components = Arrays.copyOf(inputComponents, size);
     }
 
     public int getSize() {
@@ -40,13 +39,12 @@ public class Vector {
 
     @Override
     public String toString() {
-        String[] vectorStringArray = new String[getSize()];
+        StringBuilder componentsStringBuilder = new StringBuilder(Arrays.toString(components));
 
-        for (int i = 0; i < getSize(); ++i) {
-            vectorStringArray[i] = components[i] + "";
-        }
+        componentsStringBuilder.setCharAt(0, '{');
+        componentsStringBuilder.setCharAt(componentsStringBuilder.length() - 1, '}');
 
-        return "{" + String.join(", ", vectorStringArray) + "}";
+        return componentsStringBuilder.toString();
     }
 
     @Override
@@ -60,12 +58,6 @@ public class Vector {
         }
 
         Vector v = (Vector) o;
-
-        int size = components.length;
-
-        if (size != v.components.length) {
-            return false;
-        }
 
         return Arrays.equals(components, v.components);
     }
@@ -81,26 +73,21 @@ public class Vector {
     }
 
     public void add(Vector vector) {
-        int size = components.length;
-        double[] resultContents;
+        int inputVectorSize = vector.components.length;
 
-        if (size >= vector.components.length) {
-            resultContents = Arrays.copyOf(vector.components, size);
-        } else {
-            resultContents = Arrays.copyOf(components, vector.components.length);
-            components = vector.components;
+        if (components.length < inputVectorSize) {
+            components = Arrays.copyOf(components, inputVectorSize);
         }
 
-        for (int i = 0; i < vector.components.length; ++i) {
-            components[i] += resultContents[i];
+        for (int i = 0; i < inputVectorSize; ++i) {
+            components[i] += vector.components[i];
         }
     }
 
     public void subtract(Vector vector) {
-        int size = components.length;
         int inputVectorSize = vector.components.length;
 
-        if (size < inputVectorSize) {
+        if (components.length < inputVectorSize) {
             components = Arrays.copyOf(components, inputVectorSize);
         }
 
@@ -132,27 +119,21 @@ public class Vector {
     public double getComponentByIndex(int index) {
         int size = components.length;
 
-        if (index >= size) {
-            throw new ArrayIndexOutOfBoundsException("Index must be < " + size + ". Current value is " + index);
-        }
-        if (index < 0) {
-            throw new ArrayIndexOutOfBoundsException("Index must be >= 0. Current value is " + index);
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index must be < " + size + " and >= 0. Current index is " + index);
         }
 
         return components[index];
     }
 
-    public void setComponentByIndex(int index, double value) {
+    public void setComponentByIndex(int index, double component) {
         int size = components.length;
 
-        if (index >= size) {
-            throw new ArrayIndexOutOfBoundsException("Index must be < " + size + ". Current value is " + index);
-        }
-        if (index < 0) {
-            throw new ArrayIndexOutOfBoundsException("Index must be >= 0. Current value is " + index);
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index must be < " + size + " and >= 0. Current index is " + index);
         }
 
-        components[index] = value;
+        components[index] = component;
     }
 
     public static Vector getSum(Vector vector1, Vector vector2) {
@@ -174,12 +155,12 @@ public class Vector {
     public static double getScalarMultiplication(Vector vector1, Vector vector2) {
         int size = Math.min(vector1.components.length, vector2.components.length);
 
-        double resultValue = 0;
+        double resultMultiplication = 0;
 
         for (int i = 0; i < size; ++i) {
-            resultValue += vector1.components[i] * vector2.components[i];
+            resultMultiplication += vector1.components[i] * vector2.components[i];
         }
 
-        return resultValue;
+        return resultMultiplication;
     }
 }
