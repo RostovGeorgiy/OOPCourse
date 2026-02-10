@@ -42,7 +42,7 @@ public class Main {
                 new Vector(new double[]{4.0, 4.0, 4.0, 4.0, 4.0}),
                 new Vector(new double[]{2.0, 2.0})));
 
-        System.out.println("Static scalar multiplication method: " + Vector.getScalarMultiplication(
+        System.out.println("Static scalar multiplication method: " + Vector.getScalarProduct(
                 new Vector(new double[]{2.0, 2.0}),
                 new Vector(new double[]{4.0, 4.0, 4.0, 4.0, 4.0})));
     }

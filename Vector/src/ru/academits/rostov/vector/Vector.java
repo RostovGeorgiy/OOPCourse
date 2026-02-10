@@ -120,7 +120,7 @@ public class Vector {
         int size = components.length;
 
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index must be < " + size + " and >= 0. Current index is " + index);
+            throw new IndexOutOfBoundsException("Index must be >= 0 and < " + size + ". Current index is " + index);
         }
 
         return components[index];
@@ -130,7 +130,7 @@ public class Vector {
         int size = components.length;
 
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index must be < " + size + " and >= 0. Current index is " + index);
+            throw new IndexOutOfBoundsException("Index must be >= 0 and < " + size + ". Current index is " + index);
         }
 
         components[index] = component;
@@ -152,15 +152,15 @@ public class Vector {
         return resultVector;
     }
 
-    public static double getScalarMultiplication(Vector vector1, Vector vector2) {
-        int size = Math.min(vector1.components.length, vector2.components.length);
+    public static double getScalarProduct(Vector vector1, Vector vector2) {
+        int minInputVectorsSize = Math.min(vector1.components.length, vector2.components.length);
 
-        double resultMultiplication = 0;
+        double scalarProduct = 0;
 
-        for (int i = 0; i < size; ++i) {
-            resultMultiplication += vector1.components[i] * vector2.components[i];
+        for (int i = 0; i < minInputVectorsSize; ++i) {
+            scalarProduct += vector1.components[i] * vector2.components[i];
         }
 
-        return resultMultiplication;
+        return scalarProduct;
     }
 }
