@@ -14,7 +14,7 @@ public class Vector {
     }
 
     public Vector(Vector vector) {
-        this.components = Arrays.copyOf(vector.components, vector.components.length);
+        components = Arrays.copyOf(vector.components, vector.components.length);
     }
 
     public Vector(double[] components) {
@@ -25,12 +25,12 @@ public class Vector {
         this.components = Arrays.copyOf(components, components.length);
     }
 
-    public Vector(int size, double[] inputComponents) {
+    public Vector(int size, double[] components) {
         if (size <= 0) {
             throw new IllegalArgumentException("Vector size must be >= 0. Current size: " + size);
         }
 
-        components = Arrays.copyOf(inputComponents, size);
+        this.components = Arrays.copyOf(components, size);
     }
 
     public int getSize() {
@@ -153,11 +153,11 @@ public class Vector {
     }
 
     public static double getScalarProduct(Vector vector1, Vector vector2) {
-        int minInputVectorsSize = Math.min(vector1.components.length, vector2.components.length);
+        int minSize = Math.min(vector1.components.length, vector2.components.length);
 
         double scalarProduct = 0;
 
-        for (int i = 0; i < minInputVectorsSize; ++i) {
+        for (int i = 0; i < minSize; ++i) {
             scalarProduct += vector1.components[i] * vector2.components[i];
         }
 
