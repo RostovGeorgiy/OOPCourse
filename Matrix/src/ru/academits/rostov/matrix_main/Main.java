@@ -21,7 +21,7 @@ public class Main {
         System.out.println("Set matrix vector by index.");
         matrix2.setRowByIndex(new Vector(3), 1);
 
-        System.out.println("Get matrix string vector by index: " + matrix2.getRowByIndex(1));
+        System.out.println("Get matrix row vector by index: " + matrix2.getRowByIndex(1));
 
         System.out.println("Get matrix column vector by index: " + matrix2.getColumnByIndex(1));
 
@@ -59,8 +59,8 @@ public class Main {
         );
 
         System.out.println("Static product method: " + Matrix.getProduct(
-                new Matrix(new double[][]{new double[]{-2, 1}, new double[]{5, 4}}),
-                new Matrix(new double[][]{new double[]{3}, new double[]{-1}}))
+                new Matrix(new double[][]{new double[]{2, -3, 1}, new double[]{5, 4, -2}}),
+                new Matrix(new double[][]{new double[]{-7, 5}, new double[]{2, -1}, new double[]{4, 3}}))
         );
     }
 }
