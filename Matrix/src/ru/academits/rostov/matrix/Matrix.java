@@ -62,10 +62,6 @@ public class Matrix {
             columnsAmount = Math.max(columnsAmount, vector.getSize());
         }
 
-        if (columnsAmount == 0) {
-            throw new IllegalArgumentException("At least one vector in array must have length > 0.");
-        }
-
         int rowsAmount = vectors.length;
 
         rows = new Vector[rowsAmount];
@@ -209,7 +205,7 @@ public class Matrix {
         double determinant = 0;
 
         for (int i = 0; i < size; ++i) {
-            findSubMatrix(matrix, subMatrix, i);
+            fillSubMatrix(matrix, subMatrix, i);
             determinant += sign * matrix.rows[0].getComponentByIndex(i) * getDeterminantRecursive(subMatrix);
 
             sign = -sign;
@@ -218,16 +214,16 @@ public class Matrix {
         return determinant;
     }
 
-    private static void findSubMatrix(Matrix matrix, Matrix subMatrix, int columnIndex) {
+    private static void fillSubMatrix(Matrix matrix, Matrix subMatrix, int columnIndex) {
         int size = matrix.rows.length;
 
         for (int i = 1; i < size; ++i) {
-            int nextMatrixCurrentColumn = 0;
+            int subMatrixCurrentColumn = 0;
 
             for (int j = 0; j < size; ++j) {
                 if (j != columnIndex) {
-                    subMatrix.rows[i - 1].setComponentByIndex(nextMatrixCurrentColumn, matrix.rows[i].getComponentByIndex(j));
-                    nextMatrixCurrentColumn++;
+                    subMatrix.rows[i - 1].setComponentByIndex(subMatrixCurrentColumn, matrix.rows[i].getComponentByIndex(j));
+                    subMatrixCurrentColumn++;
                 }
             }
         }
@@ -252,7 +248,7 @@ public class Matrix {
         return productVector;
     }
 
-    private static void check2MatricesEqualDimensions(Matrix matrix1, Matrix matrix2) {
+    private static void checkMatricesHaveEqualDimensions(Matrix matrix1, Matrix matrix2) {
         if (matrix1.rows.length != matrix2.rows.length) {
             throw new IllegalArgumentException("Matrices must have equal amounts of rows. Current amounts of rows: "
                     + matrix1.rows.length + " and " + matrix2.rows.length + ".");
@@ -267,7 +263,7 @@ public class Matrix {
     public void add(Matrix matrix) {
         int rowsAmount = matrix.rows.length;
 
-        check2MatricesEqualDimensions(this, matrix);
+        checkMatricesHaveEqualDimensions(this, matrix);
 
         for (int i = 0; i < rowsAmount; ++i) {
             rows[i].add(matrix.rows[i]);
@@ -277,7 +273,7 @@ public class Matrix {
     public void subtract(Matrix matrix) {
         int rowsAmount = matrix.rows.length;
 
-        check2MatricesEqualDimensions(this, matrix);
+        checkMatricesHaveEqualDimensions(this, matrix);
 
         for (int i = 0; i < rowsAmount; ++i) {
             rows[i].subtract(matrix.rows[i]);
@@ -285,7 +281,7 @@ public class Matrix {
     }
 
     public static Matrix getSum(Matrix matrix1, Matrix matrix2) {
-        check2MatricesEqualDimensions(matrix1, matrix2);
+        checkMatricesHaveEqualDimensions(matrix1, matrix2);
 
         Matrix sumMatrix = new Matrix(matrix1);
 
@@ -295,7 +291,7 @@ public class Matrix {
     }
 
     public static Matrix getDifference(Matrix matrix1, Matrix matrix2) {
-        check2MatricesEqualDimensions(matrix1, matrix2);
+        checkMatricesHaveEqualDimensions(matrix1, matrix2);
 
         Matrix differenceMatrix = new Matrix(matrix1);
 
