@@ -19,7 +19,7 @@ public class Matrix {
         rows = new Vector[rowsAmount];
 
         for (int i = 0; i < rowsAmount; ++i) {
-            rows[i] = new Vector(columnsAmount, new double[]{});
+            rows[i] = new Vector(columnsAmount);
         }
     }
 
@@ -38,19 +38,17 @@ public class Matrix {
             throw new IllegalArgumentException("Array length must be not be 0.");
         }
 
-        int rowsAmount = array.length;
-
-        rows = new Vector[rowsAmount];
-
         int columnsAmount = 0;
 
-        for (double[] e : array) {
-            columnsAmount = Math.max(columnsAmount, e.length);
+        for (double[] row : array) {
+            columnsAmount = Math.max(columnsAmount, row.length);
         }
 
         if (columnsAmount == 0) {
             throw new IllegalArgumentException("At least one sub array must have length > 0.");
         }
+
+        rows = new Vector[array.length];
 
         for (int i = 0; i < array.length; ++i) {
             rows[i] = new Vector(columnsAmount, array[i]);
@@ -58,14 +56,6 @@ public class Matrix {
     }
 
     public Matrix(Vector[] vectors) {
-        if (vectors.length == 0) {
-            throw new IllegalArgumentException("Array length should not be 0.");
-        }
-
-        int rowsAmount = vectors.length;
-
-        rows = new Vector[rowsAmount];
-
         int columnsAmount = 0;
 
         for (Vector vector : vectors) {
@@ -76,9 +66,17 @@ public class Matrix {
             throw new IllegalArgumentException("At least one vector in array must have length > 0.");
         }
 
+        int rowsAmount = vectors.length;
+
+        rows = new Vector[rowsAmount];
+
         for (int i = 0; i < rowsAmount; ++i) {
-            if (vectors[i].getSize() < columnsAmount) {
-                for (int j = 0; j < columnsAmount; ++j) {
+            int currentRowSize = vectors[i].getSize();
+
+            if (currentRowSize < columnsAmount) {
+                rows[i] = new Vector(columnsAmount);
+
+                for (int j = 0; j < currentRowSize; ++j) {
                     rows[i].setComponentByIndex(j, vectors[i].getComponentByIndex(j));
                 }
             } else {
@@ -112,7 +110,7 @@ public class Matrix {
 
         if (vectorSize != getColumnsAmount()) {
             throw new IllegalArgumentException("Size of argument vector must match amount of columns. Current size is " + vectorSize +
-                    " And amount of columns is: " + getColumnsAmount());
+                    " and amount of columns is: " + getColumnsAmount());
         }
 
         rows[index] = new Vector(vector);
@@ -183,8 +181,8 @@ public class Matrix {
     }
 
     public void multiplyByScalar(double scalar) {
-        for (Vector rowVector : rows) {
-            rowVector.multiplyByScalar(scalar);
+        for (Vector row : rows) {
+            row.multiplyByScalar(scalar);
         }
     }
 
@@ -197,22 +195,22 @@ public class Matrix {
         return getDeterminantRecursive(this);
     }
 
-    private static double getDeterminantRecursive(Matrix currentMatrix) {
-        int size = currentMatrix.getRowsAmount();
+    private static double getDeterminantRecursive(Matrix matrix) {
+        int size = matrix.getRowsAmount();
 
         if (size == 1) {
-            return currentMatrix.rows[0].getComponentByIndex(0);
+            return matrix.rows[0].getComponentByIndex(0);
         }
 
-        Matrix nextMatrix = new Matrix(size - 1, size - 1);
+        Matrix subMatrix = new Matrix(size - 1, size - 1);
 
         int sign = 1;
 
         double determinant = 0;
 
         for (int i = 0; i < size; ++i) {
-            calculateCofactor(currentMatrix, nextMatrix, i);
-            determinant += sign * currentMatrix.rows[0].getComponentByIndex(i) * getDeterminantRecursive(nextMatrix);
+            findSubMatrix(matrix, subMatrix, i);
+            determinant += sign * matrix.rows[0].getComponentByIndex(i) * getDeterminantRecursive(subMatrix);
 
             sign = -sign;
         }
@@ -220,15 +218,15 @@ public class Matrix {
         return determinant;
     }
 
-    private static void calculateCofactor(Matrix currentMatrix, Matrix nextMatrix, int columnIndex) {
-        int size = currentMatrix.rows.length;
+    private static void findSubMatrix(Matrix matrix, Matrix subMatrix, int columnIndex) {
+        int size = matrix.rows.length;
 
         for (int i = 1; i < size; ++i) {
             int nextMatrixCurrentColumn = 0;
 
             for (int j = 0; j < size; ++j) {
                 if (j != columnIndex) {
-                    nextMatrix.rows[i - 1].setComponentByIndex(nextMatrixCurrentColumn, currentMatrix.rows[i].getComponentByIndex(j));
+                    subMatrix.rows[i - 1].setComponentByIndex(nextMatrixCurrentColumn, matrix.rows[i].getComponentByIndex(j));
                     nextMatrixCurrentColumn++;
                 }
             }
@@ -254,27 +252,7 @@ public class Matrix {
         return productVector;
     }
 
-    public void add(Matrix matrix) {
-        int rowsAmount = matrix.rows.length;
-
-        checkMatrixDimensions(this, matrix);
-
-        for (int i = 0; i < rowsAmount; ++i) {
-            rows[i].add(matrix.rows[i]);
-        }
-    }
-
-    public void subtract(Matrix matrix) {
-        int rowsAmount = matrix.rows.length;
-
-        checkMatrixDimensions(this, matrix);
-
-        for (int i = 0; i < rowsAmount; ++i) {
-            rows[i].subtract(matrix.rows[i]);
-        }
-    }
-
-    private static void checkMatrixDimensions(Matrix matrix1, Matrix matrix2) {
+    private static void check2MatricesEqualDimensions(Matrix matrix1, Matrix matrix2) {
         if (matrix1.rows.length != matrix2.rows.length) {
             throw new IllegalArgumentException("Matrices must have equal amounts of rows. Current amounts of rows: "
                     + matrix1.rows.length + " and " + matrix2.rows.length + ".");
@@ -286,8 +264,28 @@ public class Matrix {
         }
     }
 
+    public void add(Matrix matrix) {
+        int rowsAmount = matrix.rows.length;
+
+        check2MatricesEqualDimensions(this, matrix);
+
+        for (int i = 0; i < rowsAmount; ++i) {
+            rows[i].add(matrix.rows[i]);
+        }
+    }
+
+    public void subtract(Matrix matrix) {
+        int rowsAmount = matrix.rows.length;
+
+        check2MatricesEqualDimensions(this, matrix);
+
+        for (int i = 0; i < rowsAmount; ++i) {
+            rows[i].subtract(matrix.rows[i]);
+        }
+    }
+
     public static Matrix getSum(Matrix matrix1, Matrix matrix2) {
-        checkMatrixDimensions(matrix1, matrix2);
+        check2MatricesEqualDimensions(matrix1, matrix2);
 
         Matrix sumMatrix = new Matrix(matrix1);
 
@@ -297,7 +295,7 @@ public class Matrix {
     }
 
     public static Matrix getDifference(Matrix matrix1, Matrix matrix2) {
-        checkMatrixDimensions(matrix1, matrix2);
+        check2MatricesEqualDimensions(matrix1, matrix2);
 
         Matrix differenceMatrix = new Matrix(matrix1);
 

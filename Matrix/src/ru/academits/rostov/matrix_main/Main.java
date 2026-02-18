@@ -8,7 +8,7 @@ public class Main {
         Matrix zerosMatrix = new Matrix(3, 3);
         Matrix matrix1 = new Matrix(zerosMatrix);
         Matrix matrix2 = new Matrix(new double[][]{new double[]{1, 2, 3}, new double[]{4, 5, 6}});
-        Matrix matrix3 = new Matrix(new Vector[]{new Vector(new double[]{1, 2, -1}), new Vector(new double[]{0, 3, 4}), new Vector(new double[]{-2, 5, 6})});
+        Matrix matrix3 = new Matrix(new Vector[]{new Vector(new double[]{1, 2, -1}), new Vector(new double[]{0, 3, 4}), new Vector(new double[]{5, 6})});
 
         System.out.println(zerosMatrix);
 
