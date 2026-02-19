@@ -56,6 +56,10 @@ public class Matrix {
     }
 
     public Matrix(Vector[] vectors) {
+        if (vectors.length == 0) {
+            throw new IllegalArgumentException("Array length must be > 0.");
+        }
+
         int columnsAmount = 0;
 
         for (Vector vector : vectors) {
@@ -218,12 +222,12 @@ public class Matrix {
         int size = matrix.rows.length;
 
         for (int i = 1; i < size; ++i) {
-            int subMatrixCurrentColumn = 0;
+            int subMatrixColumnIndex = 0;
 
             for (int j = 0; j < size; ++j) {
                 if (j != columnIndex) {
-                    subMatrix.rows[i - 1].setComponentByIndex(subMatrixCurrentColumn, matrix.rows[i].getComponentByIndex(j));
-                    subMatrixCurrentColumn++;
+                    subMatrix.rows[i - 1].setComponentByIndex(subMatrixColumnIndex, matrix.rows[i].getComponentByIndex(j));
+                    subMatrixColumnIndex++;
                 }
             }
         }
