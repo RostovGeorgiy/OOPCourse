@@ -248,13 +248,12 @@ public class SinglyLinkedList<T> {
     public void flip() {
         ListItem<T> previousItem = null;
         ListItem<T> currentItem = head;
-        ListItem<T> nextTemp;
 
         while (currentItem != null) {
-            nextTemp = currentItem.getNext();
+            ListItem<T> nextItem = currentItem.getNext();
             currentItem.setNext(previousItem);
             previousItem = currentItem;
-            currentItem = nextTemp;
+            currentItem = nextItem;
         }
 
         head = previousItem;
