@@ -1,26 +1,27 @@
 package ru.academits.rostov.list;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class SingleLinkedList<T> {
+public class SinglyLinkedList<T> {
     private ListItem<T> head;
-    private int size = 0;
+    private int size;
 
-    public SingleLinkedList() {
+    public SinglyLinkedList() {
     }
 
-    private ListItem<T> getItemByIndex(int index) {
+    private void checkIndex(int index) {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Index must be >= 0 and < list size. Current index: "
                     + index + " and size: " + size + ".");
         }
+    }
 
+    private ListItem<T> getItemByIndex(int index) {
         int i = 0;
 
         ListItem<T> item = head;
 
-        while (i < index - 1) {
+        while (i < index) {
             item = item.getNext();
             ++i;
         }
@@ -32,9 +33,17 @@ public class SingleLinkedList<T> {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
+        stringBuilder.append("[");
+
         for (ListItem<T> item = head; item != null; item = item.getNext()) {
             stringBuilder.append(item.getData());
+
+            if (item.getNext() != null) {
+                stringBuilder.append(", ");
+            }
         }
+
+        stringBuilder.append("]");
 
         return stringBuilder.toString();
     }
@@ -49,23 +58,24 @@ public class SingleLinkedList<T> {
             return false;
         }
 
-        SingleLinkedList<?> list = (SingleLinkedList<?>) o;
+        SinglyLinkedList<?> list = (SinglyLinkedList<?>) o;
 
-        if (this.size != list.size) {
+        if (size != list.size) {
+            return false;
+        }
+
+        if (size != list.getSize()) {
             return false;
         }
 
         ListItem<T> thisCurrentItem = head;
         ListItem<?> otherCurrentItem = list.head;
 
-        if (size != list.getSize()) {
-            return false;
-        }
-
         while (thisCurrentItem != null) {
             if (!Objects.equals(thisCurrentItem.getData(), otherCurrentItem.getData())) {
                 return false;
             }
+
             thisCurrentItem = thisCurrentItem.getNext();
             otherCurrentItem = otherCurrentItem.getNext();
         }
@@ -75,13 +85,13 @@ public class SingleLinkedList<T> {
 
     @Override
     public int hashCode() {
-        int prime = 37;
+        final int prime = 37;
         int hash = 1;
 
         ListItem<T> currentItem = head;
 
         while (currentItem != null) {
-            hash = prime * hash + currentItem.getData().hashCode();
+            hash = prime * hash + (currentItem.getData() != null ? currentItem.getData().hashCode() : 0);
             currentItem = currentItem.getNext();
         }
 
@@ -93,10 +103,7 @@ public class SingleLinkedList<T> {
     }
 
     public T getDataByIndex(int index) {
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index must be >= 0 and < list size. Current index: "
-                    + index + " and size: " + size + ".");
-        }
+        checkIndex(index);
 
         int i = 0;
 
@@ -111,18 +118,9 @@ public class SingleLinkedList<T> {
     }
 
     public T setDataByIndex(int index, T data) {
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index must be >= 0 and < list size. Current index: "
-                    + index + " and size: " + size + ".");
-        }
+        checkIndex(index);
 
-        int i = 0;
-        ListItem<T> currentItem = head;
-
-        while (i < index) {
-            currentItem = currentItem.getNext();
-            ++i;
-        }
+        ListItem<T> currentItem = getItemByIndex(index);
 
         T oldData = currentItem.getData();
         currentItem.setData(data);
@@ -131,30 +129,23 @@ public class SingleLinkedList<T> {
     }
 
     public T deleteItemByIndex(int index) {
-        if (head == null) {
-            throw new NoSuchElementException("List must not be empty!");
-        }
-
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index must be >= 0 and < list size. Current index: "
-                    + index + " and size: " + size + ".");
-        }
+        checkIndex(index);
 
         T deletedData;
 
         if (index == 0) {
-            deletedData = head.getData();
-
-            head = head.getNext();
+            return deleteFirst();
         } else {
             ListItem<T> targetItem = getItemByIndex(index - 1);
 
-            deletedData = targetItem.getNext().getData();
+            ListItem<T> nextTargetItem = targetItem.getNext();
 
-            targetItem.setNext(targetItem.getNext().getNext());
+            deletedData = nextTargetItem.getData();
+
+            targetItem.setNext(nextTargetItem.getNext());
+
+            --size;
         }
-
-        --size;
 
         return deletedData;
     }
@@ -194,13 +185,19 @@ public class SingleLinkedList<T> {
     }
 
     public void insertItemByIndex(int index, T data) {
-        if (index < 0 || (index != 0 && index >= size)) {
-            throw new IndexOutOfBoundsException("Index must be >= 0 and < list size. Current index: "
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Index must be >= 0 and <= list size. Current index: "
                     + index + " and size: " + size + ".");
         }
 
         if (index == 0) {
             insertFirst(data);
+
+            return;
+        }
+
+        if (index == size) {
+            add(data);
 
             return;
         }
@@ -221,37 +218,25 @@ public class SingleLinkedList<T> {
     }
 
     public boolean deleteItemByData(T data) {
-        if (head == null) {
-            throw new NoSuchElementException("List must not be empty!");
-        }
-
         if (Objects.equals(head.getData(), data)) {
-            head = head.getNext();
-            --size;
+            deleteFirst();
+
             return true;
         }
 
-        ListItem<T> current = head;
-
-        while (current.getNext() != null) {
-            if (Objects.equals(current.getNext().getData(), data)) {
-                current.setNext(current.getNext().getNext());
-
-                --size;
-
-                return true;
+        for (ListItem<T> currentItem = head, previousItem = null;
+             currentItem != null;
+             previousItem = currentItem, currentItem = currentItem.getNext()) {
+            if (currentItem.getData().equals(data)) {
+                assert previousItem != null;
+                previousItem.setNext(currentItem.getNext());
             }
-            current = current.getNext();
         }
 
         return false;
     }
 
     public T deleteFirst() {
-        if (head == null) {
-            throw new NoSuchElementException("List must not be empty!");
-        }
-
         T deletedData = head.getData();
 
         head = head.getNext();
@@ -261,10 +246,6 @@ public class SingleLinkedList<T> {
     }
 
     public void flip() {
-        if (head == null) {
-            throw new NoSuchElementException("List must not be empty!");
-        }
-
         ListItem<T> previousItem = null;
         ListItem<T> currentItem = head;
         ListItem<T> nextTemp;
@@ -279,16 +260,22 @@ public class SingleLinkedList<T> {
         head = previousItem;
     }
 
-    public SingleLinkedList<T> copy() {
+    public SinglyLinkedList<T> copy() {
+        SinglyLinkedList<T> copyList = new SinglyLinkedList<>();
 
-        ListItem<T> currentItem = head;
+        copyList.head = new ListItem<>(head.getData());
 
-        SingleLinkedList<T> copyList = new SingleLinkedList<>();
+        ListItem<T> currentItem = head.getNext();
+        ListItem<T> currentCopyItem = copyList.head;
 
-        for (int i = 0; i < size; ++i) {
-            copyList.add(currentItem.getData());
+        while (currentItem != null) {
+            currentCopyItem.setNext(new ListItem<>(currentItem.getData()));
+            currentCopyItem = currentCopyItem.getNext();
             currentItem = currentItem.getNext();
+
         }
+
+        copyList.size = size;
 
         return copyList;
     }

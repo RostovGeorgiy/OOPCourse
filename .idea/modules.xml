@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/ArrayList/ArrayList.iml" filepath="$PROJECT_DIR$/ArrayList/ArrayList.iml" />
       <module fileurl="file://$PROJECT_DIR$/CSV/CSV.iml" filepath="$PROJECT_DIR$/CSV/CSV.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CSVtest/CSVtest.iml" filepath="$PROJECT_DIR$/CSVtest/CSVtest.iml" />
       <module fileurl="file://$PROJECT_DIR$/Files/Files.iml" filepath="$PROJECT_DIR$/Files/Files.iml" />
       <module fileurl="file://$PROJECT_DIR$/Knapsack/Knapsack.iml" filepath="$PROJECT_DIR$/Knapsack/Knapsack.iml" />
       <module fileurl="file://$PROJECT_DIR$/List/List.iml" filepath="$PROJECT_DIR$/List/List.iml" />
