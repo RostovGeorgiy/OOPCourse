@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         SinglyLinkedList<String> list = new SinglyLinkedList<>();
 
-        list.insertFirst("This");
+        list.addFirst("This");
         list.add("is a");
         list.add("string1");
 

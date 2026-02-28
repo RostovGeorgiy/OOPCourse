@@ -1,9 +1,10 @@
 package ru.academits.rostov.list;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class SinglyLinkedList<T> {
-    private ListItem<T> head;
+public class SinglyLinkedList<E> {
+    private ListItem<E> head;
     private int size;
 
     public SinglyLinkedList() {
@@ -16,10 +17,12 @@ public class SinglyLinkedList<T> {
         }
     }
 
-    private ListItem<T> getItemByIndex(int index) {
+    private ListItem<E> getItemByIndex(int index) {
+        checkIndex(index);
+
         int i = 0;
 
-        ListItem<T> item = head;
+        ListItem<E> item = head;
 
         while (i < index) {
             item = item.getNext();
@@ -33,17 +36,13 @@ public class SinglyLinkedList<T> {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("[");
+        stringBuilder.append('[');
 
-        for (ListItem<T> item = head; item != null; item = item.getNext()) {
-            stringBuilder.append(item.getData());
-
-            if (item.getNext() != null) {
-                stringBuilder.append(", ");
-            }
+        for (ListItem<E> item = head; item != null; item = item.getNext()) {
+            stringBuilder.append(item.getData()).append(", ");
         }
 
-        stringBuilder.append("]");
+        stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length() - 1, "]");
 
         return stringBuilder.toString();
     }
@@ -68,7 +67,7 @@ public class SinglyLinkedList<T> {
             return false;
         }
 
-        ListItem<T> thisCurrentItem = head;
+        ListItem<E> thisCurrentItem = head;
         ListItem<?> otherCurrentItem = list.head;
 
         while (thisCurrentItem != null) {
@@ -88,7 +87,7 @@ public class SinglyLinkedList<T> {
         final int prime = 37;
         int hash = 1;
 
-        ListItem<T> currentItem = head;
+        ListItem<E> currentItem = head;
 
         while (currentItem != null) {
             hash = prime * hash + (currentItem.getData() != null ? currentItem.getData().hashCode() : 0);
@@ -102,142 +101,112 @@ public class SinglyLinkedList<T> {
         return size;
     }
 
-    public T getDataByIndex(int index) {
+    public E getDataByIndex(int index) {
         checkIndex(index);
 
-        int i = 0;
-
-        ListItem<T> currentItem = head;
-
-        while (i < index) {
-            currentItem = currentItem.getNext();
-            ++i;
-        }
-
-        return currentItem.getData();
+        return getItemByIndex(index).getData();
     }
 
-    public T setDataByIndex(int index, T data) {
+    public E setDataByIndex(int index, E data) {
         checkIndex(index);
 
-        ListItem<T> currentItem = getItemByIndex(index);
+        ListItem<E> currentItem = getItemByIndex(index);
 
-        T oldData = currentItem.getData();
+        E oldData = currentItem.getData();
         currentItem.setData(data);
 
         return oldData;
     }
 
-    public T deleteItemByIndex(int index) {
+    public E deleteItemByIndex(int index) {
         checkIndex(index);
-
-        T deletedData;
 
         if (index == 0) {
             return deleteFirst();
-        } else {
-            ListItem<T> targetItem = getItemByIndex(index - 1);
-
-            ListItem<T> nextTargetItem = targetItem.getNext();
-
-            deletedData = nextTargetItem.getData();
-
-            targetItem.setNext(nextTargetItem.getNext());
-
-            --size;
         }
+
+        ListItem<E> previousItem = getItemByIndex(index - 1);
+
+        ListItem<E> itemToDelete = previousItem.getNext();
+
+        E deletedData = itemToDelete.getData();
+
+        previousItem.setNext(itemToDelete.getNext());
+
+        --size;
 
         return deletedData;
     }
 
-    public void insertFirst(T data) {
-        if (head == null) {
-            head = new ListItem<>(data);
-        } else {
-            head = new ListItem<>(data, head);
-        }
+    public E getFirst() {
+        return head.getData();
+    }
+
+    public void addFirst(E data) {
+        head = new ListItem<>(data, head);
 
         ++size;
     }
 
-    public void add(T data) {
+    public void add(E data) {
         if (head == null) {
-            insertFirst(data);
+            addFirst(data);
 
             return;
         }
 
-        if (head.getNext() == null) {
-            head.setNext(new ListItem<>(data));
-            ++size;
-
-            return;
-        }
-
-        ListItem<T> currentItem = head.getNext();
-
-        while (currentItem.getNext() != null) {
-            currentItem = currentItem.getNext();
-        }
-
-        currentItem.setNext(new ListItem<>(data));
-        ++size;
+        insertItemByIndex(size, data);
     }
 
-    public void insertItemByIndex(int index, T data) {
+    public void insertItemByIndex(int index, E data) {
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException("Index must be >= 0 and <= list size. Current index: "
                     + index + " and size: " + size + ".");
         }
 
         if (index == 0) {
-            insertFirst(data);
+            addFirst(data);
 
             return;
         }
 
-        if (index == size) {
-            add(data);
+        ListItem<E> currentItem = getItemByIndex(index - 1);
 
-            return;
-        }
-
-        int i = 0;
-        ListItem<T> currentItem = head;
-
-        while (i < index - 1) {
-            currentItem = currentItem.getNext();
-            ++i;
-        }
-
-        ListItem<T> newItem = new ListItem<>(data, currentItem.getNext());
+        ListItem<E> newItem = new ListItem<>(data, currentItem.getNext());
 
         currentItem.setNext(newItem);
 
         ++size;
     }
 
-    public boolean deleteItemByData(T data) {
-        if (Objects.equals(head.getData(), data)) {
+    public boolean deleteItemByData(E data) {
+        if (head == null) {
+            return false;
+        }
+
+        if (data == null ? head.getData() == null : data.equals(head.getData())) {
             deleteFirst();
 
             return true;
         }
 
-        for (ListItem<T> currentItem = head, previousItem = null;
+        for (ListItem<E> currentItem = head, previousItem = null;
              currentItem != null;
              previousItem = currentItem, currentItem = currentItem.getNext()) {
-            if (currentItem.getData().equals(data)) {
-                assert previousItem != null;
+            if (data == null ? currentItem.getData() == null : data.equals(currentItem.getData())) {
                 previousItem.setNext(currentItem.getNext());
             }
         }
 
-        return false;
+        return true;
     }
 
-    public T deleteFirst() {
-        T deletedData = head.getData();
+    public E deleteFirst() {
+        if (head == null) {
+            throw new NoSuchElementException("The list is empty.");
+        }
+
+        E deletedData = head.getData();
 
         head = head.getNext();
         --size;
@@ -246,11 +215,11 @@ public class SinglyLinkedList<T> {
     }
 
     public void flip() {
-        ListItem<T> previousItem = null;
-        ListItem<T> currentItem = head;
+        ListItem<E> previousItem = null;
+        ListItem<E> currentItem = head;
 
         while (currentItem != null) {
-            ListItem<T> nextItem = currentItem.getNext();
+            ListItem<E> nextItem = currentItem.getNext();
             currentItem.setNext(previousItem);
             previousItem = currentItem;
             currentItem = nextItem;
@@ -259,19 +228,18 @@ public class SinglyLinkedList<T> {
         head = previousItem;
     }
 
-    public SinglyLinkedList<T> copy() {
-        SinglyLinkedList<T> copyList = new SinglyLinkedList<>();
+    public SinglyLinkedList<E> copy() {
+        SinglyLinkedList<E> copyList = new SinglyLinkedList<>();
 
         copyList.head = new ListItem<>(head.getData());
 
-        ListItem<T> currentItem = head.getNext();
-        ListItem<T> currentCopyItem = copyList.head;
+        ListItem<E> currentItem = head.getNext();
+        ListItem<E> currentCopyItem = copyList.head;
 
         while (currentItem != null) {
             currentCopyItem.setNext(new ListItem<>(currentItem.getData()));
             currentCopyItem = currentCopyItem.getNext();
             currentItem = currentItem.getNext();
-
         }
 
         copyList.size = size;
