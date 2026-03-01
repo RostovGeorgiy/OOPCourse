@@ -15,14 +15,14 @@ public class Main {
 
         System.out.println(list);
 
-        System.out.println(list.deleteItemByIndex(1));
+        System.out.println(list.deleteByIndex(1));
 
         System.out.println(list);
 
-        list.insertItemByIndex(1, "is changed");
+        list.addByIndex(1, "is changed");
 
-        list.insertItemByIndex(0, "!");
-        System.out.println(list.deleteItemByData("avb"));
+        list.addByIndex(0, "!");
+        System.out.println(list.deleteByData("avb"));
 
         list.flip();
 
@@ -35,10 +35,13 @@ public class Main {
 
         System.out.println("Deleting first item in copy list: " + copyList.deleteFirst());
 
-        list.deleteItemByData("!");
+        list.deleteByData("!");
 
-        copyList.insertItemByIndex(copyList.getSize(), "someData");
+        copyList.addByIndex(copyList.getSize(), "someData");
 
         System.out.println(copyList);
+
+        System.out.println(new SinglyLinkedList<>().copy());
+
     }
 }

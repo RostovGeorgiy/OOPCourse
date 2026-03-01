@@ -18,8 +18,6 @@ public class SinglyLinkedList<E> {
     }
 
     private ListItem<E> getItemByIndex(int index) {
-        checkIndex(index);
-
         int i = 0;
 
         ListItem<E> item = head;
@@ -41,8 +39,11 @@ public class SinglyLinkedList<E> {
         for (ListItem<E> item = head; item != null; item = item.getNext()) {
             stringBuilder.append(item.getData()).append(", ");
         }
-
-        stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length() - 1, "]");
+        if (stringBuilder.length() > 1) {
+            stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length(), "]");
+        } else {
+            stringBuilder.append(']');
+        }
 
         return stringBuilder.toString();
     }
@@ -60,10 +61,6 @@ public class SinglyLinkedList<E> {
         SinglyLinkedList<?> list = (SinglyLinkedList<?>) o;
 
         if (size != list.size) {
-            return false;
-        }
-
-        if (size != list.getSize()) {
             return false;
         }
 
@@ -118,7 +115,7 @@ public class SinglyLinkedList<E> {
         return oldData;
     }
 
-    public E deleteItemByIndex(int index) {
+    public E deleteByIndex(int index) {
         checkIndex(index);
 
         if (index == 0) {
@@ -139,26 +136,23 @@ public class SinglyLinkedList<E> {
     }
 
     public E getFirst() {
+        if (head == null) {
+            throw new NoSuchElementException("List is empty!");
+        }
+
         return head.getData();
     }
 
     public void addFirst(E data) {
         head = new ListItem<>(data, head);
-
         ++size;
     }
 
     public void add(E data) {
-        if (head == null) {
-            addFirst(data);
-
-            return;
-        }
-
-        insertItemByIndex(size, data);
+        addByIndex(size, data);
     }
 
-    public void insertItemByIndex(int index, E data) {
+    public void addByIndex(int index, E data) {
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException("Index must be >= 0 and <= list size. Current index: "
                     + index + " and size: " + size + ".");
@@ -170,30 +164,30 @@ public class SinglyLinkedList<E> {
             return;
         }
 
-        ListItem<E> currentItem = getItemByIndex(index - 1);
+        ListItem<E> previousItem = getItemByIndex(index - 1);
 
-        ListItem<E> newItem = new ListItem<>(data, currentItem.getNext());
+        ListItem<E> newItem = new ListItem<>(data, previousItem.getNext());
 
-        currentItem.setNext(newItem);
+        previousItem.setNext(newItem);
 
         ++size;
     }
 
-    public boolean deleteItemByData(E data) {
+    public boolean deleteByData(E data) {
         if (head == null) {
             return false;
         }
 
-        if (data == null ? head.getData() == null : data.equals(head.getData())) {
+        if (Objects.equals(data, head.getData())) {
             deleteFirst();
 
             return true;
         }
 
-        for (ListItem<E> currentItem = head, previousItem = null;
+        for (ListItem<E> currentItem = head.getNext(), previousItem = null;
              currentItem != null;
              previousItem = currentItem, currentItem = currentItem.getNext()) {
-            if (data == null ? currentItem.getData() == null : data.equals(currentItem.getData())) {
+            if (Objects.equals(data, currentItem.getData())) {
                 previousItem.setNext(currentItem.getNext());
             }
         }
@@ -230,6 +224,10 @@ public class SinglyLinkedList<E> {
 
     public SinglyLinkedList<E> copy() {
         SinglyLinkedList<E> copyList = new SinglyLinkedList<>();
+
+        if (head == null) {
+            return copyList;
+        }
 
         copyList.head = new ListItem<>(head.getData());
 
