@@ -71,5 +71,8 @@ public class Main {
         list.addAll(4, new ArrayList<>(Arrays.asList(100, 200, 300)));
         list.removeLast();
         System.out.println(list);
+
+        MyArrayList<Integer> list2 = new MyArrayList<>(new ArrayList<>(Arrays.asList(100, 200, 300)));
+        System.out.println(list2);
     }
 }

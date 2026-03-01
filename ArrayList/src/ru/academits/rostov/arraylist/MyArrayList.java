@@ -13,10 +13,20 @@ public class MyArrayList<E> implements List<E> {
         items = (E[]) new Object[10];
     }
 
-    public MyArrayList(int size) {
-        this();
-        this.size = size;
-        ensureCapacity(size);
+    public MyArrayList(int capacity) {
+        //noinspection unchecked
+        items = (E[]) new Object[capacity];
+    }
+
+    public MyArrayList(Collection<? extends E> c) {
+        //noinspection unchecked
+        items = (E[]) new Object[c.size()];
+
+        @SuppressWarnings("unchecked") Iterator<E> collectionIterator = (Iterator<E>) c.iterator();
+
+        while (collectionIterator.hasNext()) {
+            add(collectionIterator.next());
+        }
     }
 
     private void checkArgumentNotNull(Object o) {
@@ -174,7 +184,7 @@ public class MyArrayList<E> implements List<E> {
         int previousSize = size;
 
         for (int i = 0; i < size; ++i) {
-            if (items[i].equals(o)) {
+            if (Objects.equals(items[i], o)) {
                 System.arraycopy(items, 0, items, 0, i);
 
                 System.arraycopy(items, i + 1, items, i, size - (i + 1));
