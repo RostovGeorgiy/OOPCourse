@@ -46,7 +46,6 @@ public class SinglyLinkedList<E> {
 
         stringBuilder.append(']');
 
-
         return stringBuilder.toString();
     }
 
@@ -191,6 +190,8 @@ public class SinglyLinkedList<E> {
              previousItem = currentItem, currentItem = currentItem.getNext()) {
             if (Objects.equals(data, currentItem.getData())) {
                 previousItem.setNext(currentItem.getNext());
+
+                --size;
 
                 return true;
             }

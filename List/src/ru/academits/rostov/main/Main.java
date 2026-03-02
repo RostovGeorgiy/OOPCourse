@@ -37,7 +37,6 @@ public class Main {
         System.out.println("Deleting first item in copy list: " + copyList.deleteFirst());
 
         System.out.println("Deleting by data: " + list.deleteByData("new"));
-
         System.out.println(list);
 
         copyList.addByIndex(copyList.getSize(), "someData");
@@ -45,6 +44,5 @@ public class Main {
         System.out.println(copyList);
 
         System.out.println(new SinglyLinkedList<>().copy());
-
     }
 }
