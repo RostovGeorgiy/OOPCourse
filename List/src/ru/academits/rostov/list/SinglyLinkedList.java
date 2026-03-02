@@ -39,11 +39,13 @@ public class SinglyLinkedList<E> {
         for (ListItem<E> item = head; item != null; item = item.getNext()) {
             stringBuilder.append(item.getData()).append(", ");
         }
+
         if (stringBuilder.length() > 1) {
-            stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length(), "]");
-        } else {
-            stringBuilder.append(']');
+            stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
         }
+
+        stringBuilder.append(']');
+
 
         return stringBuilder.toString();
     }
@@ -137,7 +139,7 @@ public class SinglyLinkedList<E> {
 
     public E getFirst() {
         if (head == null) {
-            throw new NoSuchElementException("List is empty!");
+            throw new NoSuchElementException("The list is empty.");
         }
 
         return head.getData();
@@ -184,15 +186,17 @@ public class SinglyLinkedList<E> {
             return true;
         }
 
-        for (ListItem<E> currentItem = head.getNext(), previousItem = null;
+        for (ListItem<E> currentItem = head.getNext(), previousItem = head;
              currentItem != null;
              previousItem = currentItem, currentItem = currentItem.getNext()) {
             if (Objects.equals(data, currentItem.getData())) {
                 previousItem.setNext(currentItem.getNext());
+
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     public E deleteFirst() {

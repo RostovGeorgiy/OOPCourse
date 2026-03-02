@@ -31,11 +31,14 @@ public class Main {
         System.out.println("Base list: " + list);
 
         list.setDataByIndex(1, "new");
+
         System.out.println("Copy list: " + copyList);
 
         System.out.println("Deleting first item in copy list: " + copyList.deleteFirst());
 
-        list.deleteByData("!");
+        System.out.println("Deleting by data: " + list.deleteByData("new"));
+
+        System.out.println(list);
 
         copyList.addByIndex(copyList.getSize(), "someData");
 
