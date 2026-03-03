@@ -1,20 +1,22 @@
 package ru.academits.rostov.arraylist_main;
 
-import ru.academits.rostov.arraylist.MyArrayList;
+import ru.academits.rostov.arraylist.ArrayList;
 
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        MyArrayList<Integer> list = new MyArrayList<>();
+        ArrayList<Integer> list = new ArrayList<>(3);
 
         list.add(3);
         list.add(2);
         list.add(1);
 
-        Integer[] array = new Integer[2];
+        Integer[] array = new Integer[3];
 
         array = list.toArray(array);
+
+        System.out.println("toArray(a) method:");
         System.out.println(Arrays.toString(array));
 
         System.out.println(list.set(2, 8));
@@ -31,29 +33,30 @@ public class Main {
 
         System.out.println(list);
 
-        List<Integer> list1 = new ArrayList<>(Arrays.asList(1, 2, 3));
+        List<Integer> list1 = new java.util.ArrayList<>(Arrays.asList(1, 2, 3));
 
         System.out.println(list.size() + " " + list1.size());
 
-        System.out.println(list.addAll(list1));
+        System.out.println(list.addAll(0, list1));
 
-        System.out.println(list.size() + " " + list1.size());
-
+        System.out.println("List after addAll method:");
         System.out.println(list);
 
+        System.out.println(list.contains(100));
+
         System.out.println("Testing containsAll method:");
-        System.out.println(list.containsAll(new ArrayList<>(Arrays.asList(3, 2, 8))));
+        System.out.println(list.containsAll(new java.util.ArrayList<>(Arrays.asList(3, 2, 8))));
 
         System.out.println("Testing addAll method:");
-        System.out.println(list.addAll(new ArrayList<>(Arrays.asList(10, 20, 30))));
+        System.out.println(list.addAll(new java.util.ArrayList<>(Arrays.asList(10, 20, 30))));
         System.out.println(list);
 
         System.out.println("Testing removeAll method:");
-        System.out.println(list.removeAll(new ArrayList<>(Arrays.asList(30, 100, 5))));
+        System.out.println(list.removeAll(new java.util.ArrayList<>(Arrays.asList(30, 100, 5))));
         System.out.println(list);
 
         System.out.println("Testing add(index) method:");
-        list.add(2, 50);
+        list.add(3, 50);
         System.out.println(list);
 
         System.out.println("Testing remove method:");
@@ -68,11 +71,11 @@ public class Main {
             System.out.println(intIterator.next());
         }
 
-        list.addAll(4, new ArrayList<>(Arrays.asList(100, 200, 300)));
+        list.addAll(4, new java.util.ArrayList<>(Arrays.asList(100, 200, 300)));
         list.removeLast();
         System.out.println(list);
 
-        MyArrayList<Integer> list2 = new MyArrayList<>(new ArrayList<>(Arrays.asList(100, 200, 300)));
+        ArrayList<Integer> list2 = new ArrayList<>(new java.util.ArrayList<>(Arrays.asList(100, 200, 300)));
         System.out.println(list2);
     }
 }
