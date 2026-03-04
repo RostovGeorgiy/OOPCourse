@@ -1,141 +1,61 @@
 package ru.academits.rostov.csv_main;
 
+import ru.academits.rostov.csv.Csv;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    private static void replaceCharacters(StringBuilder htmlStringBuilder, String target, String replacementString) {
-        int targetIndex = htmlStringBuilder.indexOf(target);
-
-        while (targetIndex != -1) {
-            htmlStringBuilder.replace(targetIndex, targetIndex + target.length(), replacementString);
-            targetIndex = htmlStringBuilder.indexOf(target, targetIndex + replacementString.length());
-        }
-    }
-
-    private static String convertStringHTML(String htmlString) {
-        StringBuilder htmlStringBuilder = new StringBuilder(htmlString);
-
-        replaceCharacters(htmlStringBuilder, "&", "&amp;");
-
-        replaceCharacters(htmlStringBuilder, "<", "&lt;");
-
-        replaceCharacters(htmlStringBuilder, ">", "&gt;");
-
-        return htmlStringBuilder.toString();
-    }
-
-    private static String replaceTwinQuotes(String tableCellString) {
-        StringBuilder tableCellStringBuilder = new StringBuilder(tableCellString.substring(1, tableCellString.length() - 1));
-
-        replaceCharacters(tableCellStringBuilder, "\"\"", "\"");
-        return tableCellStringBuilder.toString();
-    }
-
     public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(new FileInputStream("input.txt"));
-             PrintWriter writer = new PrintWriter("output.txt")) {
 
-            writer.write("<table>\n");
+        String inputFilePath = args[0];
+        String outputFilPath = args[1];
+
+        try (Scanner scanner = new Scanner(new FileInputStream(inputFilePath));
+             PrintWriter writer = new PrintWriter(outputFilPath)) {
+
+            writer.println("""
+                    <!DOCTYPE html>
+                    <html lang = "en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>CSV to HTML.</title>
+                    </head>
+                    <body>
+                    <h1>HTML file containing table converted from CSV file.</h1>
+                    <table border="1">""");
+
+            ArrayList<String> result = new ArrayList<>();
 
             boolean isLineBreak = false;
 
-            StringBuilder fileStringBuilder = new StringBuilder();
-
-            int quotesAmount = 0;
-
-            int tableCellStartPosition = 0;
-
-            StringBuilder lineBreakStringBuilder = new StringBuilder();
-
             while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
 
-                String fileLine = convertStringHTML(scanner.nextLine());
+                result.addAll(Csv.convertFileLine(line, isLineBreak));
 
-                if (!isLineBreak) {
-                    fileStringBuilder = new StringBuilder(fileLine.length());
+                if (result.getLast().equals("    </tr>")) {
+                    writer.println(String.join("", result));
 
-                    fileStringBuilder.append("<tr>");
+                    isLineBreak = false;
 
-                    tableCellStartPosition = 0;
-
-                    quotesAmount = 0;
-                }
-
-                for (int i = 0; i < fileLine.length(); ++i) {
-                    if (fileLine.charAt(i) == '"') {
-                        quotesAmount += 1;
-                    }
-
-                    if (i == fileLine.length() - 1) {
-                        if (isLineBreak) {
-                            lineBreakStringBuilder.append(fileLine, tableCellStartPosition, i + 1);
-
-                            if (quotesAmount % 2 == 0) {
-                                lineBreakStringBuilder.append("<br/>");
-                            } else {
-                                fileStringBuilder.append(replaceTwinQuotes(lineBreakStringBuilder.toString()));
-                                writer.write(fileStringBuilder.toString());
-
-                                quotesAmount = 0;
-                                tableCellStartPosition = i + 1;
-
-                                isLineBreak = false;
-
-                                fileStringBuilder.setLength(0);
-                                lineBreakStringBuilder.setLength(0);
-                            }
-                        } else if (quotesAmount > 0 && quotesAmount % 2 == 0) {
-                            fileStringBuilder.append("<td>").append(replaceTwinQuotes(fileLine.substring(tableCellStartPosition, i + 1))).append("</td>");
-                        } else if (quotesAmount == 0) {
-                            fileStringBuilder.append("<td>").append(fileLine, tableCellStartPosition, i + 1).append("</td>");
-                        } else {
-                            isLineBreak = true;
-
-                            fileStringBuilder.append("<td>");
-
-                            lineBreakStringBuilder.append(fileLine, tableCellStartPosition, i + 1).append("<br/>");
-
-                            tableCellStartPosition = 0;
-
-                            quotesAmount = 0;
-                        }
-                    } else if (fileLine.charAt(i) == ',' && quotesAmount % 2 != 0 && isLineBreak) {
-                        fileStringBuilder.append(replaceTwinQuotes(lineBreakStringBuilder.append(fileLine, tableCellStartPosition, i).toString())).append("</td>");
-
-                        quotesAmount = 0;
-                        tableCellStartPosition = i + 1;
-
-                        isLineBreak = false;
-
-                        fileStringBuilder.setLength(0);
-                        lineBreakStringBuilder.setLength(0);
-                    } else if (fileLine.charAt(i) == ',' && quotesAmount % 2 == 0) {
-                        if (quotesAmount > 0) {
-                            quotesAmount = 0;
-
-                            fileStringBuilder.append("<td>").append(replaceTwinQuotes(fileLine.substring(tableCellStartPosition, i))).append("</td>");
-
-                            tableCellStartPosition = i + 1;
-                        } else if (quotesAmount == 0) {
-                            fileStringBuilder.append("<td>").append(fileLine, tableCellStartPosition, i).append("</td>");
-                            tableCellStartPosition = i + 1;
-                        }
-                    }
-                }
-
-                if (!isLineBreak) {
-                    fileStringBuilder.append("</tr>\n");
-
-                    writer.write(fileStringBuilder.toString());
+                    result.clear();
+                } else {
+                    isLineBreak = true;
                 }
             }
 
-            writer.write("</table>");
+            writer.print("""
+                    </table>
+                    </body>
+                    </html>""");
+
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            System.out.println("An exception has occurred: " + e.getMessage());
         }
     }
 }
