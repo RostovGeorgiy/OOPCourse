@@ -1,16 +1,18 @@
 package ru.academits.rostov.arraylist_main;
 
-import ru.academits.rostov.arraylist.ArrayList;
+import ru.academits.rostov.arraylist.CustomArrayList;
 
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        ArrayList<Integer> list = new ArrayList<>(3);
+        CustomArrayList<Integer> list = new CustomArrayList<>(0);
 
         list.add(3);
         list.add(2);
         list.add(1);
+
+        System.out.println("Equals: " + list.equals(new CustomArrayList<>(Arrays.asList(3, 1, 1))));
 
         Integer[] array = new Integer[3];
 
@@ -75,7 +77,10 @@ public class Main {
         list.removeLast();
         System.out.println(list);
 
-        ArrayList<Integer> list2 = new ArrayList<>(new java.util.ArrayList<>(Arrays.asList(100, 200, 300)));
+        CustomArrayList<Integer> list2 = new CustomArrayList<>(new java.util.ArrayList<>(Arrays.asList(100, 200, 300)));
+        System.out.println(list2);
+
+        list2.clear();
         System.out.println(list2);
     }
 }

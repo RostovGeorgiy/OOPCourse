@@ -2,33 +2,31 @@ package ru.academits.rostov.arraylist;
 
 import java.util.*;
 
-public class ArrayList<E> implements List<E> {
+public class CustomArrayList<E> implements List<E> {
     private E[] items;
     private int size;
 
     private int modCount;
 
-    public ArrayList() {
+    public CustomArrayList() {
         //noinspection unchecked
         items = (E[]) new Object[10];
     }
 
-    public ArrayList(int capacity) {
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("Capacity must be > 0. Current capacity is: " + capacity);
+    public CustomArrayList(int capacity) {
+        if (capacity < 0) {
+            throw new IllegalArgumentException("Capacity must be >= 0. Current capacity is: " + capacity);
         }
-
         //noinspection unchecked
         items = (E[]) new Object[capacity];
     }
 
-    public ArrayList(Collection<? extends E> c) {
+    public CustomArrayList(Collection<? extends E> c) {
         //noinspection unchecked
         items = (E[]) new Object[c.size()];
 
         addAll(c);
     }
-
 
     private void checkIndex(int index) {
         if (index < 0 || index >= size) {
@@ -69,7 +67,7 @@ public class ArrayList<E> implements List<E> {
             return false;
         }
 
-        @SuppressWarnings("unchecked") ArrayList<E> list = (ArrayList<E>) o;
+        CustomArrayList<?> list = (CustomArrayList<?>) o;
 
         return Arrays.equals(items, list.items);
     }
@@ -79,8 +77,8 @@ public class ArrayList<E> implements List<E> {
         final int prime = 37;
         int hash = 1;
 
-        hash = prime * hash + size;
-        return prime * hash + Arrays.hashCode(items);
+        hash = prime * hash + Arrays.hashCode(items);
+        return hash;
     }
 
     @Override
@@ -95,12 +93,14 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public boolean contains(Object o) {
+        Objects.requireNonNull(o, "Argument must not be null");
+
         return indexOf(o) != -1;
     }
 
-    private class MyIterator implements Iterator<E> {
+    private class CustomIterator implements Iterator<E> {
         private int currentIndex = -1;
-        int initialModCount = modCount;
+        private final int initialModCount = modCount;
 
         @Override
         public boolean hasNext() {
@@ -124,7 +124,7 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public Iterator<E> iterator() {
-        return new MyIterator();
+        return new CustomIterator();
     }
 
     @Override
@@ -132,7 +132,7 @@ public class ArrayList<E> implements List<E> {
         return Arrays.copyOf(items, size);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy"})
     @Override
     public <T> T[] toArray(T[] a) {
         if (a == null) {
@@ -144,9 +144,7 @@ public class ArrayList<E> implements List<E> {
             return (T[]) Arrays.copyOf(items, size, a.getClass());
         }
 
-        for (int i = 0; i < size; ++i) {
-            a[i] = (T) items[i];
-        }
+        System.arraycopy(items, 0, a, 0, size);
 
         if (a.length > size) {
             a[size] = null;
@@ -157,6 +155,8 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public boolean add(E item) {
+        Objects.requireNonNull(item, "Argument must not be null");
+
         if (size >= items.length) {
             increaseCapacity();
         }
@@ -170,15 +170,17 @@ public class ArrayList<E> implements List<E> {
     }
 
     private void increaseCapacity() {
-        if (size == 0) {
+        if (items.length == 0) {
             ensureCapacity(10);
         } else {
-            ensureCapacity(size * 2);
+            ensureCapacity(items.length * 2);
         }
     }
 
     @Override
     public boolean remove(Object o) {
+        Objects.requireNonNull(o, "Argument must not be null");
+
         int index = indexOf(o);
 
         if (index == -1) {
@@ -192,13 +194,7 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        if (c == null) {
-            throw new NullPointerException("Collection must not be null");
-        }
-
-        if (c.isEmpty()) {
-            return false;
-        }
+        Objects.requireNonNull(c, "Argument must not be null");
 
         for (Object collectionItem : c) {
             if (!contains(collectionItem)) {
@@ -211,9 +207,12 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
+        Objects.requireNonNull(c, "Argument must not be null");
+
         return addAll(size, c);
     }
 
+    @SuppressWarnings({"SuspiciousSystemArraycopy"})
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
         if (index < 0 || index > size) {
@@ -227,10 +226,14 @@ public class ArrayList<E> implements List<E> {
             return false;
         }
 
-        for (E item : c) {
-            add(index, item);
-            ++index;
-        }
+        int collectionSize = c.size();
+
+        ensureCapacity(size + collectionSize);
+
+        System.arraycopy(items, index, items, index + collectionSize, size - index);
+        System.arraycopy(c.toArray(), 0, items, index, collectionSize);
+
+        size += collectionSize;
 
         return true;
     }
@@ -245,10 +248,9 @@ public class ArrayList<E> implements List<E> {
 
         boolean isChanged = false;
 
-        for (int i = 0; i < size; ++i) {
+        for (int i = size - 1; i >= 0; --i) {
             if (c.contains(items[i])) {
                 remove(i);
-                --i;
 
                 isChanged = true;
             }
@@ -263,10 +265,9 @@ public class ArrayList<E> implements List<E> {
 
         boolean isChanged = false;
 
-        for (int i = 0; i < size; ++i) {
+        for (int i = size - 1; i >= 0; --i) {
             if (!c.contains(items[i])) {
                 remove(i);
-                --i;
 
                 isChanged = true;
             }
@@ -283,9 +284,12 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public void clear() {
-        for (int i = 0; i < size; ++i) {
-            items[i] = null;
+        if (size != 0) {
+            Arrays.fill(items, null);
         }
+
+        size = 0;
+        ++modCount;
     }
 
     @Override
@@ -297,6 +301,8 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public E set(int index, E item) {
+        Objects.requireNonNull(item, "Argument must not be null");
+
         checkIndex(index);
 
         E oldData = items[index];
@@ -313,12 +319,17 @@ public class ArrayList<E> implements List<E> {
                     + index + " and size: " + size + ".");
         }
 
+        Objects.requireNonNull(item, "Argument must not be null");
+
         if (index == size) {
             add(item);
             return;
         }
 
-        ensureCapacity(size + 1);
+        if (size + 1 >= items.length) {
+            increaseCapacity();
+        }
+
         System.arraycopy(items, index, items, index + 1, size - index);
         items[index] = item;
 
@@ -342,6 +353,8 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public int indexOf(Object o) {
+        Objects.requireNonNull(o, "Argument must not be null");
+
         for (int i = 0; i < size; ++i) {
             if (Objects.equals(items[i], o)) {
                 return i;
@@ -353,6 +366,8 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public int lastIndexOf(Object o) {
+        Objects.requireNonNull(o, "Argument must not be null");
+
         for (int i = size - 1; i >= 0; i--) {
             if (Objects.equals(items[i], o)) {
                 return i;
