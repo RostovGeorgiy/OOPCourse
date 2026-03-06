@@ -6,13 +6,13 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        CustomArrayList<Integer> list = new CustomArrayList<>(0);
+        CustomArrayList<Integer> list = new CustomArrayList<>();
 
-        list.add(3);
-        list.add(2);
         list.add(1);
+        list.add(2);
+        list.add(null);
 
-        System.out.println("Equals: " + list.equals(new CustomArrayList<>(Arrays.asList(3, 1, 1))));
+        System.out.println("Equals: " + list.equals(new CustomArrayList<>(Arrays.asList(1, 2, null))));
 
         Integer[] array = new Integer[3];
 
@@ -23,7 +23,7 @@ public class Main {
 
         System.out.println(list.set(2, 8));
 
-        System.out.println(Arrays.toString(array));
+        System.out.println(list);
 
         Integer integer = list.get(1);
 

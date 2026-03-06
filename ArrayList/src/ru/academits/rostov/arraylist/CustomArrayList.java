@@ -17,6 +17,7 @@ public class CustomArrayList<E> implements List<E> {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be >= 0. Current capacity is: " + capacity);
         }
+
         //noinspection unchecked
         items = (E[]) new Object[capacity];
     }
@@ -69,7 +70,7 @@ public class CustomArrayList<E> implements List<E> {
 
         CustomArrayList<?> list = (CustomArrayList<?>) o;
 
-        return Arrays.equals(items, list.items);
+        return Arrays.equals(toArray(), list.toArray());
     }
 
     @Override
@@ -77,7 +78,7 @@ public class CustomArrayList<E> implements List<E> {
         final int prime = 37;
         int hash = 1;
 
-        hash = prime * hash + Arrays.hashCode(items);
+        hash = prime * hash + Arrays.hashCode(toArray());
         return hash;
     }
 
@@ -94,7 +95,6 @@ public class CustomArrayList<E> implements List<E> {
     @Override
     public boolean contains(Object o) {
         Objects.requireNonNull(o, "Argument must not be null");
-
         return indexOf(o) != -1;
     }
 
@@ -155,8 +155,6 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public boolean add(E item) {
-        Objects.requireNonNull(item, "Argument must not be null");
-
         if (size >= items.length) {
             increaseCapacity();
         }
@@ -179,8 +177,6 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public boolean remove(Object o) {
-        Objects.requireNonNull(o, "Argument must not be null");
-
         int index = indexOf(o);
 
         if (index == -1) {
@@ -208,11 +204,9 @@ public class CustomArrayList<E> implements List<E> {
     @Override
     public boolean addAll(Collection<? extends E> c) {
         Objects.requireNonNull(c, "Argument must not be null");
-
         return addAll(size, c);
     }
 
-    @SuppressWarnings({"SuspiciousSystemArraycopy"})
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
         if (index < 0 || index > size) {
@@ -231,7 +225,13 @@ public class CustomArrayList<E> implements List<E> {
         ensureCapacity(size + collectionSize);
 
         System.arraycopy(items, index, items, index + collectionSize, size - index);
-        System.arraycopy(c.toArray(), 0, items, index, collectionSize);
+
+        int i = index;
+
+        for (E item : c) {
+            items[i] = item;
+            ++i;
+        }
 
         size += collectionSize;
 
@@ -285,17 +285,16 @@ public class CustomArrayList<E> implements List<E> {
     @Override
     public void clear() {
         if (size != 0) {
-            Arrays.fill(items, null);
-        }
+            Arrays.fill(items, 0, size, null);
 
-        size = 0;
-        ++modCount;
+            size = 0;
+            ++modCount;
+        }
     }
 
     @Override
     public E get(int index) {
         checkIndex(index);
-
         return items[index];
     }
 
@@ -306,7 +305,6 @@ public class CustomArrayList<E> implements List<E> {
         checkIndex(index);
 
         E oldData = items[index];
-
         items[index] = item;
 
         return oldData;
@@ -326,7 +324,7 @@ public class CustomArrayList<E> implements List<E> {
             return;
         }
 
-        if (size + 1 >= items.length) {
+        if (size + 1 > items.length) {
             increaseCapacity();
         }
 
@@ -342,8 +340,9 @@ public class CustomArrayList<E> implements List<E> {
         checkIndex(index);
 
         E deletedItem = items[index];
-
         System.arraycopy(items, index + 1, items, index, size - index - 1);
+
+        items[size - 1] = null;
 
         ++modCount;
         --size;
