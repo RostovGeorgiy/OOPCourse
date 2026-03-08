@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        CustomArrayList<Integer> list = new CustomArrayList<>();
+        CustomArrayList<Integer> list = new CustomArrayList<>(15);
 
         list.add(1);
         list.add(2);

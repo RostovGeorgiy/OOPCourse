@@ -70,7 +70,17 @@ public class CustomArrayList<E> implements List<E> {
 
         CustomArrayList<?> list = (CustomArrayList<?>) o;
 
-        return Arrays.equals(toArray(), list.toArray());
+        if (size != list.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < size; ++i) {
+            if (!contains(list.get(i)) || !list.contains(items[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -78,7 +88,10 @@ public class CustomArrayList<E> implements List<E> {
         final int prime = 37;
         int hash = 1;
 
-        hash = prime * hash + Arrays.hashCode(toArray());
+        for (int i = 0; i < size; ++i) {
+            hash = prime * hash + items[i].hashCode();
+        }
+
         return hash;
     }
 
@@ -94,7 +107,6 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public boolean contains(Object o) {
-        Objects.requireNonNull(o, "Argument must not be null");
         return indexOf(o) != -1;
     }
 
@@ -132,7 +144,6 @@ public class CustomArrayList<E> implements List<E> {
         return Arrays.copyOf(items, size);
     }
 
-    @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy"})
     @Override
     public <T> T[] toArray(T[] a) {
         if (a == null) {
@@ -144,6 +155,7 @@ public class CustomArrayList<E> implements List<E> {
             return (T[]) Arrays.copyOf(items, size, a.getClass());
         }
 
+        //noinspection SuspiciousSystemArraycopy
         System.arraycopy(items, 0, a, 0, size);
 
         if (a.length > size) {
@@ -234,6 +246,7 @@ public class CustomArrayList<E> implements List<E> {
         }
 
         size += collectionSize;
+        ++modCount;
 
         return true;
     }
@@ -300,8 +313,6 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public E set(int index, E item) {
-        Objects.requireNonNull(item, "Argument must not be null");
-
         checkIndex(index);
 
         E oldData = items[index];
@@ -317,14 +328,12 @@ public class CustomArrayList<E> implements List<E> {
                     + index + " and size: " + size + ".");
         }
 
-        Objects.requireNonNull(item, "Argument must not be null");
-
         if (index == size) {
             add(item);
             return;
         }
 
-        if (size + 1 > items.length) {
+        if (size == items.length) {
             increaseCapacity();
         }
 
@@ -352,8 +361,6 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public int indexOf(Object o) {
-        Objects.requireNonNull(o, "Argument must not be null");
-
         for (int i = 0; i < size; ++i) {
             if (Objects.equals(items[i], o)) {
                 return i;
@@ -365,8 +372,6 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public int lastIndexOf(Object o) {
-        Objects.requireNonNull(o, "Argument must not be null");
-
         for (int i = size - 1; i >= 0; i--) {
             if (Objects.equals(items[i], o)) {
                 return i;
