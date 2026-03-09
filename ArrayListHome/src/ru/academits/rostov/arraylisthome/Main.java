@@ -17,9 +17,9 @@ public class Main {
 
             System.out.println("List containing file lines: " + fileLinesList);
         } catch (FileNotFoundException e) {
-            System.out.println("A FileNotFound exception has occurred: " + e.getMessage());
+            System.out.println("File not found: " + e.getMessage());
         } catch (IOException e) {
-            System.out.println("An IOException has occurred: " + e.getMessage());
+            System.out.println("An exception has occurred: " + e.getMessage());
         }
 
         List<Integer> integersList = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
