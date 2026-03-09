@@ -74,13 +74,30 @@ public class CustomArrayList<E> implements List<E> {
             return false;
         }
 
-        for (int i = 0; i < size; ++i) {
-            if (!contains(list.get(i)) || !list.contains(items[i])) {
+        Map<E, Integer> itemsCountMap = new HashMap<>();
+
+        for (int i = 0; i < size; i++) {
+            itemsCountMap.put(items[i], itemsCountMap.getOrDefault(items[i], 0) + 1);
+        }
+
+        for (int i = 0; i < size; i++) {
+            //noinspection unchecked
+            E item = (E) list.items[i];
+
+            if (!itemsCountMap.containsKey(item)) {
                 return false;
+            }
+
+            int newItemCount = itemsCountMap.get(item) - 1;
+
+            if (newItemCount == 0) {
+                itemsCountMap.remove(item);
+            } else {
+                itemsCountMap.put(item, newItemCount);
             }
         }
 
-        return true;
+        return itemsCountMap.isEmpty();
     }
 
     @Override
@@ -89,7 +106,7 @@ public class CustomArrayList<E> implements List<E> {
         int hash = 1;
 
         for (int i = 0; i < size; ++i) {
-            hash = prime * hash + items[i].hashCode();
+            hash = prime * hash + (items[i] != null ? items[i].hashCode() : 0);
         }
 
         return hash;
@@ -147,7 +164,7 @@ public class CustomArrayList<E> implements List<E> {
     @Override
     public <T> T[] toArray(T[] a) {
         if (a == null) {
-            throw new NullPointerException("Argument must not be null");
+            throw new NullPointerException("Input array must not be null");
         }
 
         if (a.length < size) {
@@ -202,7 +219,7 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
 
         for (Object collectionItem : c) {
             if (!contains(collectionItem)) {
@@ -215,7 +232,6 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
         return addAll(size, c);
     }
 
@@ -226,7 +242,7 @@ public class CustomArrayList<E> implements List<E> {
                     + index + " and size: " + size + ".");
         }
 
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
 
         if (c.isEmpty()) {
             return false;
@@ -253,7 +269,7 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
 
         if (c.isEmpty()) {
             return false;
@@ -274,7 +290,7 @@ public class CustomArrayList<E> implements List<E> {
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
 
         boolean isChanged = false;
 

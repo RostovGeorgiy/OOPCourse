@@ -12,7 +12,7 @@ public class Main {
         list.add(2);
         list.add(null);
 
-        System.out.println("Equals: " + list.equals(new CustomArrayList<>(Arrays.asList(1, 2, null))));
+        System.out.println("Equals: " + list.equals(new CustomArrayList<>(Arrays.asList(2, 1, null))));
 
         Integer[] array = new Integer[3];
 
