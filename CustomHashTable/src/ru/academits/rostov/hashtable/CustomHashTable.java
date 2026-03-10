@@ -5,38 +5,28 @@ import java.util.*;
 public class CustomHashTable<E> implements Collection<E> {
     private ArrayList<LinkedList<E>> buckets;
     private int size;
-    private int capacity;
 
     private int modCount;
-    private double loadFactor = 0.7;
 
     public CustomHashTable() {
         this(10);
-        capacity = 10;
     }
 
-    public CustomHashTable(int capacity) {
-        if (capacity < 0) {
-            throw new IllegalArgumentException("Capacity must be >= 0. Current capacity is: " + size);
+    public CustomHashTable(int size) {
+        if (size < 0) {
+            throw new IllegalArgumentException("Size must be >= 0. Current size is: " + size);
         }
 
-        this.capacity = capacity;
-        buckets = new ArrayList<>();
-
-        for (int i = 0; i < capacity; i++) {
-            buckets.add(new LinkedList<>());
-        }
+        this.size = size;
+        buckets = new ArrayList<>(size);
     }
 
     public CustomHashTable(Collection<? extends E> c) {
         this();
-
         addAll(c);
-
-        capacity = buckets.size();
     }
 
-    private boolean bucketNotNull(LinkedList<E> bucket) {
+    private boolean isBucketNotEmpty(LinkedList<E> bucket) {
         return !bucket.isEmpty();
     }
 
@@ -46,7 +36,7 @@ public class CustomHashTable<E> implements Collection<E> {
         stringBuilder.append('[');
 
         for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
+            if (isBucketNotEmpty(bucket)) {
                 for (E item : bucket) {
                     stringBuilder.append(item).append(", ");
                 }
@@ -60,99 +50,46 @@ public class CustomHashTable<E> implements Collection<E> {
         return stringBuilder.append(']').toString();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || o.getClass() != getClass()) {
-            return false;
-        }
-
-        CustomHashTable<?> hashTable = (CustomHashTable<?>) o;
-
-        if (size != hashTable.size()) {
-            return false;
-        }
-
-        return Arrays.equals(toArray(), hashTable.toArray());
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 37;
-        int hash = 1;
-
-        hash = prime + hash * Arrays.hashCode(toArray());
-
-        return hash;
-    }
-
     private int getHashIndex(Object o) {
-        return Math.abs(o.hashCode() % capacity);
-    }
-
-    private void resize(int newCapacity) {
-        ArrayList<LinkedList<E>> newBuckets = new ArrayList<>(newCapacity);
-
-        for (int i = 0; i < newCapacity; ++i) {
-            newBuckets.add(new LinkedList<>());
-        }
-
-        capacity = newCapacity;
-
-        for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
-                for (E item : bucket) {
-                    newBuckets.get(getHashIndex(item)).add(item);
-                }
-            }
-        }
-
-        buckets = newBuckets;
+        return Math.abs((o != null ? o.hashCode() : 0) % size);
     }
 
     @Override
     public int size() {
-        int size = 0;
+        int bucketsAmount = 0;
 
         for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
-                size += bucket.size();
+            if (isBucketNotEmpty(bucket)) {
+                ++bucketsAmount;
             }
         }
 
-        return size;
+        return bucketsAmount;
     }
 
     @Override
     public boolean isEmpty() {
-        return buckets.isEmpty();
+        for (LinkedList<E> bucket : buckets) {
+            if (isBucketNotEmpty(bucket)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
     public boolean contains(Object o) {
-        Objects.requireNonNull(o, "Argument must not be null.");
-
         return buckets.get(getHashIndex(o)).contains(o);
     }
 
-    public double getLoadFactor() {
-        return loadFactor;
-    }
-
-    public void setLoadFactor(double loadFactor) {
-        this.loadFactor = loadFactor;
-    }
-
     private class CustomIterator implements Iterator<E> {
-        private int bucketIndex = 0;
-        private Iterator<E> listIterator = null;
+        private int bucketIndex;
+        private Iterator<E> listIterator;
 
         private final int initialModCount = modCount;
 
-        CustomIterator() {
+        public CustomIterator() {
             advanceToNextBucket();
         }
 
@@ -183,7 +120,7 @@ public class CustomHashTable<E> implements Collection<E> {
             }
 
             if (modCount != initialModCount) {
-                throw new ConcurrentModificationException("List has been modified!");
+                throw new ConcurrentModificationException("Hashtable has been modified!");
             }
 
             E item = listIterator.next();
@@ -205,57 +142,46 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public Object[] toArray() {
-        ArrayList<E> items = new ArrayList<>();
+        int arraySize = 0;
 
         for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
-                items.addAll(bucket);
+            if (isBucketNotEmpty(bucket)) {
+                arraySize += bucket.size();
             }
         }
 
-        return items.toArray();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T[] toArray(T[] a) {
-        if (a == null) {
-            throw new NullPointerException("Argument must not be null");
-        }
-
-        int tableSize = 0;
-
-        for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
-                tableSize += bucket.size();
-            }
-        }
-
-        if (a.length < tableSize) {
-            ArrayList<T> tableItemsList = new ArrayList<>();
-
-            for (LinkedList<E> bucket : buckets) {
-                if (bucketNotNull(bucket)) {
-                    tableItemsList.addAll((Collection<? extends T>) bucket);
-                }
-            }
-
-            return (T[]) tableItemsList.toArray();
-        }
-
+        //noinspection unchecked
+        E[] array = (E[]) new Object[arraySize];
         int i = 0;
 
         for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
+            if (isBucketNotEmpty(bucket)) {
                 for (E item : bucket) {
-                    a[i] = (T) item;
+                    array[i] = item;
                     ++i;
                 }
             }
         }
 
-        if (a.length > size) {
-            a[size] = null;
+        return array;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T[] toArray(T[] a) {
+        Objects.requireNonNull(a, "Input array must not be null.");
+
+        T[] array = (T[]) toArray();
+        int arrayLength = array.length;
+
+        if (a.length < arrayLength) {
+            return array;
+        }
+
+        System.arraycopy(array, 0, a, 0, arrayLength);
+
+        if (a.length > array.length) {
+            a[arrayLength] = null;
         }
 
         return a;
@@ -263,22 +189,15 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean add(E e) {
-        Objects.requireNonNull(e, "Argument must not be null.");
+        int hashIndex = getHashIndex(e);
 
-        int hash = getHashIndex(e);
-
-        if (buckets.get(hash) == null) {
-            buckets.add(hash, new LinkedList<>());
+        if (hashIndex > size()) {
+            for (int i = 0; i < size; ++i) {
+                buckets.add(new LinkedList<>());
+            }
         }
 
-        buckets.get(hash).add(e);
-
-        ++size;
-
-        if ((1.0 * size / capacity) > loadFactor) {
-            resize(capacity * 2);
-        }
-
+        buckets.get(hashIndex).add(e);
         ++modCount;
 
         return true;
@@ -286,23 +205,26 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean remove(Object o) {
-        int hash = getHashIndex(o);
+        int hashIndex = getHashIndex(o);
 
-        LinkedList<E> bucket = buckets.get(hash);
+        if (hashIndex < size) {
+            LinkedList<E> bucket = buckets.get(getHashIndex(o));
 
-        if (!bucketNotNull(bucket)) {
-            return false;
+            if (!isBucketNotEmpty(bucket)) {
+                return false;
+            }
+
+            ++modCount;
+
+            return bucket.remove(o);
         }
 
-        --size;
-        ++modCount;
-
-        return bucket.remove(o);
+        return false;
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
 
         for (Object collectionItem : c) {
             if (!contains(collectionItem)) {
@@ -315,7 +237,11 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
+
+        if (c.isEmpty()) {
+            return false;
+        }
 
         for (E collectionItem : c) {
             add(collectionItem);
@@ -326,7 +252,7 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
 
         if (c.isEmpty()) {
             return false;
@@ -335,14 +261,11 @@ public class CustomHashTable<E> implements Collection<E> {
         boolean isChanged = false;
 
         for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
-                int initialBucketSize = bucket.size();
-
+            if (isBucketNotEmpty(bucket)) {
                 if (bucket.removeAll(c)) {
-                    size -= bucket.size() - initialBucketSize;
+                    isChanged = true;
                 }
 
-                isChanged = true;
             }
         }
 
@@ -355,40 +278,42 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        Objects.requireNonNull(c, "Argument must not be null");
+        Objects.requireNonNull(c, "Input collection must not be null");
 
         if (c.isEmpty()) {
-            return false;
+            clear();
+            ++modCount;
+
+            return true;
         }
 
         boolean isChanged = false;
 
         for (LinkedList<E> bucket : buckets) {
-            if (bucketNotNull(bucket)) {
-                int initialBucketSize = bucket.size();
-
+            if (isBucketNotEmpty(bucket)) {
                 if (bucket.retainAll(c)) {
-                    size -= bucket.size() - initialBucketSize;
+                    isChanged = true;
                 }
-
-                isChanged = true;
             }
         }
 
-        ++modCount;
+        if (isChanged) {
+            ++modCount;
+        }
 
         return isChanged;
     }
 
     @Override
     public void clear() {
-        for (LinkedList<E> bucket : buckets) {
-            if (bucket != null) {
-                bucket.clear();
+        if (!buckets.isEmpty()) {
+            for (LinkedList<E> bucket : buckets) {
+                if (bucket != null) {
+                    bucket.clear();
+                }
             }
-        }
 
-        ++modCount;
-        size = 0;
+            ++modCount;
+        }
     }
 }
