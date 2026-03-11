@@ -74,30 +74,13 @@ public class CustomArrayList<E> implements List<E> {
             return false;
         }
 
-        Map<E, Integer> itemsCountMap = new HashMap<>();
-
-        for (int i = 0; i < size; i++) {
-            itemsCountMap.put(items[i], itemsCountMap.getOrDefault(items[i], 0) + 1);
-        }
-
-        for (int i = 0; i < size; i++) {
-            //noinspection unchecked
-            E item = (E) list.items[i];
-
-            if (!itemsCountMap.containsKey(item)) {
+        for (int i = 0; i < size; ++i) {
+            if (items[i] != list.items[i]) {
                 return false;
             }
-
-            int newItemCount = itemsCountMap.get(item) - 1;
-
-            if (newItemCount == 0) {
-                itemsCountMap.remove(item);
-            } else {
-                itemsCountMap.put(item, newItemCount);
-            }
         }
 
-        return itemsCountMap.isEmpty();
+        return true;
     }
 
     @Override
