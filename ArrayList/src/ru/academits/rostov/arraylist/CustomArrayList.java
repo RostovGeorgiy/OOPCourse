@@ -70,12 +70,12 @@ public class CustomArrayList<E> implements List<E> {
 
         CustomArrayList<?> list = (CustomArrayList<?>) o;
 
-        if (size != list.size()) {
+        if (size != list.size) {
             return false;
         }
 
         for (int i = 0; i < size; ++i) {
-            if (items[i] != list.items[i]) {
+            if (!Objects.equals(items[i], list.items[i])) {
                 return false;
             }
         }
