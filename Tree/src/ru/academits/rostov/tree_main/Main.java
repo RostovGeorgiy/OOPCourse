@@ -36,6 +36,6 @@ public class Main {
         tree.widthFirstSearch();
 
         System.out.println("Testing size method.");
-        System.out.println(tree.size());
+        System.out.println("Amount of nodes: " + tree.size());
     }
 }
