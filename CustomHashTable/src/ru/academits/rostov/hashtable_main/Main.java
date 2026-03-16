@@ -8,45 +8,32 @@ import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args) {
-        CustomHashTable<Integer> hashTable1 = new CustomHashTable<>();
-        hashTable1.add(1);
-        hashTable1.add(null);
-        hashTable1.add(3);
-
-        CustomHashTable<Integer> hashTable2 = new CustomHashTable<>(20);
-        hashTable2.add(null);
-        hashTable2.add(1);
-        hashTable2.add(3);
-        hashTable2.add(4);
-        hashTable2.remove(4);
-
-        System.out.println("Testing equals");
-        System.out.println(hashTable1.equals(hashTable2));
+        CustomHashTable<Integer> hashTable = new CustomHashTable<>();
+        hashTable.add(1);
+        hashTable.add(null);
+        hashTable.add(3);
 
         System.out.println("Testing toArray method.");
-
-        Object[] array = hashTable1.toArray();
+        Object[] array = hashTable.toArray();
         System.out.println(Arrays.toString(array));
 
         System.out.println("Testing remove method.");
-
-        System.out.println(hashTable1.remove(153));
-        System.out.println(hashTable1);
+        System.out.println(hashTable.remove(153));
+        System.out.println(hashTable);
 
         System.out.println("Testing addAll method.");
-
-        System.out.println(hashTable1.addAll(new ArrayList<>(Arrays.asList(10, 20, 30))));
-        System.out.println(hashTable1);
+        System.out.println(hashTable.addAll(new ArrayList<>(Arrays.asList(10, 20, 30))));
+        System.out.println(hashTable);
 
         System.out.println("Testing removeAll method.");
-        System.out.println(hashTable1.removeAll(new ArrayList<>(Arrays.asList(10, 20, 30))));
-        System.out.println(Arrays.toString(hashTable1.toArray()));
+        System.out.println(hashTable.removeAll(new ArrayList<>(Arrays.asList(10, 20, 30))));
+        System.out.println(Arrays.toString(hashTable.toArray()));
 
-        hashTable1.addAll(new ArrayList<>(Arrays.asList(10, 20, 30, 10, 20, 30, 10, 20, 30, 10, 20, 30, 10, 20, 30)));
-        System.out.println("Resized hashtable: " + hashTable1);
-
-        Iterator<Integer> tableIterator = hashTable1.iterator();
-        
+        Iterator<Integer> tableIterator = hashTable.iterator();
         System.out.println(tableIterator.next());
+
+        System.out.println("Testing retainAll method.");
+        System.out.println(hashTable.retainAll(new ArrayList<>(Arrays.asList(2, 3, 5, 20))));
+        System.out.println(Arrays.toString(hashTable.toArray()));
     }
 }

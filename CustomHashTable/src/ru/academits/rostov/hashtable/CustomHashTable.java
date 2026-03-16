@@ -3,7 +3,7 @@ package ru.academits.rostov.hashtable;
 import java.util.*;
 
 public class CustomHashTable<E> implements Collection<E> {
-    private ArrayList<LinkedList<E>> buckets;
+    private final LinkedList<E>[] buckets;
     private int size;
 
     private int modCount;
@@ -12,22 +12,22 @@ public class CustomHashTable<E> implements Collection<E> {
         this(10);
     }
 
-    public CustomHashTable(int size) {
-        if (size < 0) {
-            throw new IllegalArgumentException("Size must be >= 0. Current size is: " + size);
+    public CustomHashTable(int capacity) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be > 0. Current capacity is: " + capacity);
         }
 
-        this.size = size;
-        buckets = new ArrayList<>(size);
+        //noinspection unchecked
+        buckets = new LinkedList[capacity];
+
+        for (int i = 0; i < capacity; ++i) {
+            buckets[i] = new LinkedList<>();
+        }
     }
 
     public CustomHashTable(Collection<? extends E> c) {
         this();
         addAll(c);
-    }
-
-    private boolean isBucketNotEmpty(LinkedList<E> bucket) {
-        return !bucket.isEmpty();
     }
 
     @Override
@@ -36,10 +36,8 @@ public class CustomHashTable<E> implements Collection<E> {
         stringBuilder.append('[');
 
         for (LinkedList<E> bucket : buckets) {
-            if (isBucketNotEmpty(bucket)) {
-                for (E item : bucket) {
-                    stringBuilder.append(item).append(", ");
-                }
+            for (E item : bucket) {
+                stringBuilder.append(item).append(", ");
             }
         }
 
@@ -50,37 +48,23 @@ public class CustomHashTable<E> implements Collection<E> {
         return stringBuilder.append(']').toString();
     }
 
-    private int getHashIndex(Object o) {
-        return Math.abs((o != null ? o.hashCode() : 0) % size);
+    private int getIndex(Object o) {
+        return Math.abs((o != null ? o.hashCode() : 0) % buckets.length);
     }
 
     @Override
     public int size() {
-        int bucketsAmount = 0;
-
-        for (LinkedList<E> bucket : buckets) {
-            if (isBucketNotEmpty(bucket)) {
-                ++bucketsAmount;
-            }
-        }
-
-        return bucketsAmount;
+        return size;
     }
 
     @Override
     public boolean isEmpty() {
-        for (LinkedList<E> bucket : buckets) {
-            if (isBucketNotEmpty(bucket)) {
-                return false;
-            }
-        }
-
-        return true;
+        return size == 0;
     }
 
     @Override
     public boolean contains(Object o) {
-        return buckets.get(getHashIndex(o)).contains(o);
+        return buckets[getIndex(o)].contains(o);
     }
 
     private class CustomIterator implements Iterator<E> {
@@ -95,7 +79,7 @@ public class CustomHashTable<E> implements Collection<E> {
 
         private void advanceToNextBucket() {
             while (bucketIndex < size) {
-                LinkedList<E> list = buckets.get(bucketIndex);
+                LinkedList<E> list = new LinkedList<>(buckets[bucketIndex]);
                 listIterator = list.iterator();
 
                 if (listIterator.hasNext()) {
@@ -145,9 +129,7 @@ public class CustomHashTable<E> implements Collection<E> {
         int arraySize = 0;
 
         for (LinkedList<E> bucket : buckets) {
-            if (isBucketNotEmpty(bucket)) {
-                arraySize += bucket.size();
-            }
+            arraySize += bucket.size();
         }
 
         //noinspection unchecked
@@ -155,11 +137,9 @@ public class CustomHashTable<E> implements Collection<E> {
         int i = 0;
 
         for (LinkedList<E> bucket : buckets) {
-            if (isBucketNotEmpty(bucket)) {
-                for (E item : bucket) {
-                    array[i] = item;
-                    ++i;
-                }
+            for (E item : bucket) {
+                array[i] = item;
+                ++i;
             }
         }
 
@@ -189,15 +169,11 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean add(E e) {
-        int hashIndex = getHashIndex(e);
+        int index = getIndex(e);
 
-        if (hashIndex > size()) {
-            for (int i = 0; i < size; ++i) {
-                buckets.add(new LinkedList<>());
-            }
-        }
+        buckets[index].add(e);
 
-        buckets.get(hashIndex).add(e);
+        ++size;
         ++modCount;
 
         return true;
@@ -205,21 +181,18 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean remove(Object o) {
-        int hashIndex = getHashIndex(o);
+        int index = getIndex(o);
 
-        if (hashIndex < size) {
-            LinkedList<E> bucket = buckets.get(getHashIndex(o));
+        LinkedList<E> bucket = new LinkedList<>(buckets[index]);
 
-            if (!isBucketNotEmpty(bucket)) {
-                return false;
-            }
+        boolean isChanged = bucket.remove(o);
 
+        if (isChanged) {
             ++modCount;
-
-            return bucket.remove(o);
+            --size;
         }
 
-        return false;
+        return isChanged;
     }
 
     @Override
@@ -259,18 +232,19 @@ public class CustomHashTable<E> implements Collection<E> {
         }
 
         boolean isChanged = false;
+        int newSize = 0;
 
         for (LinkedList<E> bucket : buckets) {
-            if (isBucketNotEmpty(bucket)) {
-                if (bucket.removeAll(c)) {
-                    isChanged = true;
-                }
-
+            if (bucket.removeAll(c)) {
+                isChanged = true;
             }
+
+            newSize += bucket.size();
         }
 
         if (isChanged) {
             ++modCount;
+            size = newSize;
         }
 
         return isChanged;
@@ -280,25 +254,20 @@ public class CustomHashTable<E> implements Collection<E> {
     public boolean retainAll(Collection<?> c) {
         Objects.requireNonNull(c, "Input collection must not be null");
 
-        if (c.isEmpty()) {
-            clear();
-            ++modCount;
-
-            return true;
-        }
-
         boolean isChanged = false;
+        int newSize = 0;
 
         for (LinkedList<E> bucket : buckets) {
-            if (isBucketNotEmpty(bucket)) {
-                if (bucket.retainAll(c)) {
-                    isChanged = true;
-                }
+            if (bucket.retainAll(c)) {
+                isChanged = true;
             }
+
+            newSize += bucket.size();
         }
 
         if (isChanged) {
             ++modCount;
+            size = newSize;
         }
 
         return isChanged;
@@ -306,13 +275,14 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public void clear() {
-        if (!buckets.isEmpty()) {
+        if (!isEmpty()) {
             for (LinkedList<E> bucket : buckets) {
                 if (bucket != null) {
                     bucket.clear();
                 }
             }
 
+            size = 0;
             ++modCount;
         }
     }
