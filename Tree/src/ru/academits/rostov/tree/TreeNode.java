@@ -1,9 +1,9 @@
-package ru.academits.rostov.tree_node;
+package ru.academits.rostov.tree;
 
-public class TreeNode<E> {
+class TreeNode<E> {
     private TreeNode<E> left;
     private TreeNode<E> right;
-    private E data;
+    private final E data;
 
     public TreeNode(E data) {
         this.data = data;
@@ -27,9 +27,5 @@ public class TreeNode<E> {
 
     public void setRight(TreeNode<E> node) {
         right = node;
-    }
-
-    public void setData(E data) {
-        this.data = data;
     }
 }
