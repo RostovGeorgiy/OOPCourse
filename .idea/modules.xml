@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/CustomHashTable/CustomHashTable.iml" filepath="$PROJECT_DIR$/CustomHashTable/CustomHashTable.iml" />
       <module fileurl="file://$PROJECT_DIR$/Files/Files.iml" filepath="$PROJECT_DIR$/Files/Files.iml" />
       <module fileurl="file://$PROJECT_DIR$/Knapsack/Knapsack.iml" filepath="$PROJECT_DIR$/Knapsack/Knapsack.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Lambda/Lambda.iml" filepath="$PROJECT_DIR$/Lambda/Lambda.iml" />
       <module fileurl="file://$PROJECT_DIR$/List/List.iml" filepath="$PROJECT_DIR$/List/List.iml" />
       <module fileurl="file://$PROJECT_DIR$/Matrix/Matrix.iml" filepath="$PROJECT_DIR$/Matrix/Matrix.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/OOPCourse.iml" filepath="$PROJECT_DIR$/.idea/OOPCourse.iml" />
