@@ -18,7 +18,7 @@ public class Main {
         System.out.println(Arrays.toString(array));
 
         System.out.println("Testing remove method.");
-        System.out.println(hashTable.remove(153));
+        System.out.println(hashTable.remove(3));
         System.out.println(hashTable);
 
         System.out.println("Testing addAll method.");
@@ -30,6 +30,7 @@ public class Main {
         System.out.println(Arrays.toString(hashTable.toArray()));
 
         Iterator<Integer> tableIterator = hashTable.iterator();
+        System.out.println("Testing iterator.");
         System.out.println(tableIterator.next());
 
         System.out.println("Testing retainAll method.");
