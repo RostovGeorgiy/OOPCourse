@@ -1,4 +1,4 @@
-package ru.academits.rostov.person;
+package ru.academits.rostov.lambda;
 
 public class Person {
     private final String name;

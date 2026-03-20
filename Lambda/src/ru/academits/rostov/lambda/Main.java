@@ -1,24 +1,21 @@
-package ru.academits.rostov.main;
-
-import ru.academits.rostov.person.Person;
+package ru.academits.rostov.lambda;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class Main {
     public static void main(String[] args) {
-        List<Person> personList = new ArrayList<>(Arrays.asList(
+        List<Person> personsList = Arrays.asList(
                 new Person("Ivan", 16),
-                new Person("Anastasiya", 46),
+                new Person("Anastasiya", 18),
                 new Person("Igor", 17),
                 new Person("Evgeniy", 45),
                 new Person("Olga", 30),
                 new Person("Anastasiya", 19),
-                new Person("Ivan", 26)));
+                new Person("Ivan", 48));
 
-        List<String> distinctNamesList = personList.stream()
+        List<String> distinctNamesList = personsList.stream()
                 .map(Person::getName)
                 .distinct()
                 .toList();
@@ -28,33 +25,39 @@ public class Main {
         System.out.println(distictNamesString);
 
         System.out.print("Average age below 18: ");
-        personList.stream().
-                mapToInt(Person::getAge).
-                filter(age -> age < 18).
-                average().ifPresent(System.out::println);
+        personsList.stream()
+                .mapToInt(Person::getAge)
+                .filter(age -> age < 18)
+                .average()
+                .ifPresentOrElse(System.out::println, () -> System.out.println("No people aged below 18 are in the list."));
 
-        Map<String, Double> averageAgeMap = personList.stream()
+        Map<String, Double> averageAgeByNameMap = personsList.stream()
                 .collect(Collectors.groupingBy(Person::getName, Collectors.averagingInt(Person::getAge)));
 
         System.out.println("Contents of a map with names as keys and average ages as values:");
-        averageAgeMap.forEach((n, a) -> System.out.printf("Name: %s, average age: %f%n", n, a));
-
-        Predicate<Person> agePredicate = p -> p.getAge() > 20;
+        averageAgeByNameMap.forEach((n, a) -> System.out.printf("Name: %s, average age: %f%n", n, a));
 
         System.out.println("Names of people aged between 20 and 45 sorted by descending age:");
 
-        personList.stream()
-                .filter(agePredicate.and(p -> p.getAge() < 45))
+        personsList.stream()
+                .filter(p -> p.getAge() >= 20 && p.getAge() <= 45)
                 .sorted((p1, p2) -> p2.getAge() - p1.getAge())
                 .map(Person::getName)
                 .forEach(System.out::println);
-        
+
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("How many numbers should be printed from stream?");
-        int limit = scanner.nextInt();
+        System.out.println("How many numbers should be printed from stream? (> 0)");
+        int outputAmountLimit = scanner.nextInt();
+
+        if (outputAmountLimit <= 0) {
+            throw new IllegalArgumentException("Output amount limit must be > 0.");
+        }
 
         System.out.println("Square roots:");
-        DoubleStream.iterate(0, x -> x + 1).map(Math::sqrt).limit(limit).forEach(System.out::println);
+        DoubleStream.iterate(0, x -> x + 1)
+                .map(Math::sqrt)
+                .limit(outputAmountLimit)
+                .forEach(System.out::println);
     }
 }
