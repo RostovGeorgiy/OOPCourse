@@ -31,11 +31,11 @@ public class Main {
                 .average()
                 .ifPresentOrElse(System.out::println, () -> System.out.println("No people aged below 18 are in the list."));
 
-        Map<String, Double> averageAgeByNameMap = personsList.stream()
+        Map<String, Double> averageAgesByNamesMap = personsList.stream()
                 .collect(Collectors.groupingBy(Person::getName, Collectors.averagingInt(Person::getAge)));
 
         System.out.println("Contents of a map with names as keys and average ages as values:");
-        averageAgeByNameMap.forEach((n, a) -> System.out.printf("Name: %s, average age: %f%n", n, a));
+        averageAgesByNamesMap.forEach((n, a) -> System.out.printf("Name: %s, average age: %f%n", n, a));
 
         System.out.println("Names of people aged between 20 and 45 sorted by descending age:");
 
@@ -47,17 +47,17 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("How many numbers should be printed from stream? (> 0)");
-        int outputAmountLimit = scanner.nextInt();
+        System.out.println("How many square roots should be printed from stream? (>= 0)");
+        int squareRootsAmount = scanner.nextInt();
 
-        if (outputAmountLimit <= 0) {
-            throw new IllegalArgumentException("Output amount limit must be > 0.");
+        if (squareRootsAmount < 0) {
+            return;
         }
 
         System.out.println("Square roots:");
         DoubleStream.iterate(0, x -> x + 1)
                 .map(Math::sqrt)
-                .limit(outputAmountLimit)
+                .limit(squareRootsAmount)
                 .forEach(System.out::println);
     }
 }
