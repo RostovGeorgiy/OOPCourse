@@ -19,14 +19,14 @@ public class Main {
         tree.add(11);
         tree.add(12);
 
-        System.out.println(tree.find(7));
-        System.out.println(tree.find(20));
+        System.out.println(tree.contains(7));
+        System.out.println(tree.contains(20));
 
         System.out.println("Amount of nodes: " + tree.size());
 
-        System.out.println("Testing delete method:");
-        System.out.println(tree.delete(60));
-        System.out.println(tree.delete(4));
+        System.out.println("Testing remove method:");
+        System.out.println(tree.remove(60));
+        System.out.println(tree.remove(4));
 
         System.out.println("Testing depth-first search(recursive).");
         tree.depthFirstSearchRecursive();
