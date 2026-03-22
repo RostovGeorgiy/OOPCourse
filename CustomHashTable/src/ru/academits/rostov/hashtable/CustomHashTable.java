@@ -16,12 +16,15 @@ public class CustomHashTable<E> implements Collection<E> {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be > 0. Current capacity is: " + capacity);
         }
+
         //noinspection unchecked
         buckets = new LinkedList[capacity];
     }
 
     public CustomHashTable(Collection<? extends E> c) {
         this(10);
+
+        Objects.requireNonNull(c, "Input collection must not be null.");
         addAll(c);
     }
 
@@ -61,7 +64,13 @@ public class CustomHashTable<E> implements Collection<E> {
 
     @Override
     public boolean contains(Object o) {
-        return buckets[getIndex(o)].contains(o);
+        int index = getIndex(o);
+
+        if (buckets[index] == null) {
+            return false;
+        }
+
+        return buckets[index].contains(o);
     }
 
     private class CustomIterator implements Iterator<E> {
@@ -76,6 +85,11 @@ public class CustomHashTable<E> implements Collection<E> {
 
         private void advanceToNextBucket() {
             while (bucketIndex < size) {
+                if (buckets[bucketIndex] == null) {
+                    ++bucketIndex;
+                    continue;
+                }
+
                 listIterator = buckets[bucketIndex].iterator();
 
                 if (listIterator.hasNext()) {
@@ -139,16 +153,16 @@ public class CustomHashTable<E> implements Collection<E> {
     public <T> T[] toArray(T[] a) {
         Objects.requireNonNull(a, "Input array must not be null.");
 
-        T[] array = (T[]) toArray();
-
-        if (a.length < array.length) {
+        if (a.length < size) {
             return (T[]) Arrays.copyOf(toArray(), size, a.getClass());
         }
 
-        System.arraycopy(array, 0, a, 0, array.length);
+        T[] array = (T[]) toArray();
 
-        if (a.length > array.length) {
-            a[array.length] = null;
+        System.arraycopy(array, 0, a, 0, size);
+
+        if (a.length > size) {
+            a[size] = null;
         }
 
         return a;
@@ -173,6 +187,10 @@ public class CustomHashTable<E> implements Collection<E> {
     @Override
     public boolean remove(Object o) {
         int index = getIndex(o);
+
+        if (buckets[index] == null) {
+            return false;
+        }
 
         boolean isChanged = buckets[index].remove(o);
 

@@ -11,7 +11,7 @@ public class Main {
         CustomHashTable<Integer> hashTable = new CustomHashTable<>();
         hashTable.add(1);
         hashTable.add(null);
-        hashTable.add(3);
+        hashTable.add(10);
 
         System.out.println("Testing toArray method.");
         Object[] array = hashTable.toArray();
@@ -31,10 +31,13 @@ public class Main {
 
         Iterator<Integer> tableIterator = hashTable.iterator();
         System.out.println("Testing iterator.");
-        System.out.println(tableIterator.next());
+
+        while (tableIterator.hasNext()) {
+            System.out.println(tableIterator.next());
+        }
 
         System.out.println("Testing retainAll method.");
         System.out.println(hashTable.retainAll(new ArrayList<>(Arrays.asList(2, 3, 5, 20))));
-        System.out.println(Arrays.toString(hashTable.toArray()));
+        System.out.println("HastTable is empty: " + hashTable);
     }
 }
