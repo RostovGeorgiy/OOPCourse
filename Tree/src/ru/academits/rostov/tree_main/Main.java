@@ -29,7 +29,7 @@ public class Main {
         System.out.println(tree.remove(4));
 
         System.out.println("Testing depth-first search(recursive).");
-        tree.depthFirstSearchRecursive();
+        tree.depthFirstSearchRecursive(System.out::println);
 
         System.out.println("Testing depth-first search(using stack).");
         tree.depthFirstSearch(System.out::println);

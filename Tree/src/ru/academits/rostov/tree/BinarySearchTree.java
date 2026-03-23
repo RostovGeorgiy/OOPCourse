@@ -6,19 +6,15 @@ import java.util.function.Consumer;
 public class BinarySearchTree<E> {
     private TreeNode<E> root;
     private int size;
-    Comparator<? super E> nodeDataComparator;
+    private final Comparator<? super E> comparator;
 
     public BinarySearchTree() {
         //noinspection unchecked
-        nodeDataComparator = Comparator.nullsFirst((Comparator<E>) Comparator.naturalOrder());
+        comparator = Comparator.nullsFirst((Comparator<E>) Comparator.naturalOrder());
     }
 
     public BinarySearchTree(Comparator<? super E> comparator) {
-        nodeDataComparator = comparator;
-    }
-
-    private int compare(E data1, E data2) {
-        return nodeDataComparator.compare(data1, data2);
+        this.comparator = comparator;
     }
 
     @Override
@@ -30,22 +26,9 @@ public class BinarySearchTree<E> {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append('[');
 
-        Deque<E> stack = new LinkedList<>();
-        boolean isFirst = true;
+        depthFirstSearchRecursive(root, data -> stringBuilder.append(data).append(", "));
 
-        depthFirstSearchRecursive(root, stack::add);
-
-        while (!stack.isEmpty()) {
-            if (!isFirst) {
-                stringBuilder.append(", ");
-            }
-
-            isFirst = false;
-
-            stringBuilder.append(stack.remove());
-        }
-
-        stringBuilder.append(']');
+        stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length(), "]");
 
         return stringBuilder.toString();
     }
@@ -69,14 +52,14 @@ public class BinarySearchTree<E> {
         while (currentNode != null) {
             parentNode = currentNode;
 
-            if (compare(data, currentNode.getData()) < 0) {
+            if (comparator.compare(data, currentNode.getData()) < 0) {
                 currentNode = currentNode.getLeft();
             } else {
                 currentNode = currentNode.getRight();
             }
         }
 
-        if (compare(data, parentNode.getData()) < 0) {
+        if (comparator.compare(data, parentNode.getData()) < 0) {
             parentNode.setLeft(newNode);
         } else {
             parentNode.setRight(newNode);
@@ -91,13 +74,13 @@ public class BinarySearchTree<E> {
         TreeNode<E> node = root;
 
         while (node != null) {
-            int comparisonResult = compare(data, node.getData());
+            int dataComparisonResult = comparator.compare(data, node.getData());
 
-            if (comparisonResult == 0) {
+            if (dataComparisonResult == 0) {
                 return true;
             }
 
-            if (comparisonResult < 0) {
+            if (dataComparisonResult < 0) {
                 node = node.getLeft();
             } else {
                 node = node.getRight();
@@ -115,10 +98,16 @@ public class BinarySearchTree<E> {
         TreeNode<E> currentNode = root;
         TreeNode<E> parentNode = null;
 
-        while (currentNode != null && compare(currentNode.getData(), data) != 0) {
+        while (currentNode != null) {
+            int dataComparisonResult = comparator.compare(currentNode.getData(), data);
+
+            if (dataComparisonResult == 0) {
+                break;
+            }
+
             parentNode = currentNode;
 
-            if (compare(data, currentNode.getData()) < 0) {
+            if (dataComparisonResult > 0) {
                 currentNode = currentNode.getLeft();
             } else {
                 currentNode = currentNode.getRight();
@@ -169,8 +158,8 @@ public class BinarySearchTree<E> {
         }
     }
 
-    public void depthFirstSearchRecursive() {
-        depthFirstSearchRecursive(root, System.out::println);
+    public void depthFirstSearchRecursive(Consumer<E> consumer) {
+        depthFirstSearchRecursive(root, consumer);
     }
 
     private void depthFirstSearchRecursive(TreeNode<E> node, Consumer<E> consumer) {
