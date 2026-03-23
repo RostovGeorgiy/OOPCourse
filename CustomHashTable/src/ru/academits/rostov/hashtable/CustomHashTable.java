@@ -22,9 +22,10 @@ public class CustomHashTable<E> implements Collection<E> {
     }
 
     public CustomHashTable(Collection<? extends E> c) {
-        this(10);
-
         Objects.requireNonNull(c, "Input collection must not be null.");
+
+        //noinspection unchecked
+        buckets = new LinkedList[10];
         addAll(c);
     }
 
@@ -66,11 +67,7 @@ public class CustomHashTable<E> implements Collection<E> {
     public boolean contains(Object o) {
         int index = getIndex(o);
 
-        if (buckets[index] == null) {
-            return false;
-        }
-
-        return buckets[index].contains(o);
+        return buckets[index] != null && buckets[index].contains(o);
     }
 
     private class CustomIterator implements Iterator<E> {
