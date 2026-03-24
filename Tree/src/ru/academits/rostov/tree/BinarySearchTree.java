@@ -26,7 +26,7 @@ public class BinarySearchTree<E> {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append('[');
 
-        depthFirstSearchRecursive(root, data -> stringBuilder.append(data).append(", "));
+        depthFirstSearch(data -> stringBuilder.append(data).append(", "));
 
         stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length(), "]");
 
