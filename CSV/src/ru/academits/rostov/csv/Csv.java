@@ -21,22 +21,24 @@ public class Csv {
         boolean isLineBreak = false;
 
         String line;
-        String newLine = System.lineSeparator();
+        String doubleIndent = INDENT.repeat(2);
 
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) {
                 if (isLineBreak) {
                     writer.print("<br>");
-                } else {
-                    continue;
                 }
+
+                continue;
             }
 
             int quotesAmount = 0;
 
             if (!isLineBreak) {
-                writer.print(INDENT + "<tr>");
-                writer.print(newLine + INDENT.repeat(2) + "<td>");
+                writer.print(INDENT);
+                writer.println("<tr>");
+                writer.print(doubleIndent);
+                writer.print("<td>");
             }
 
             for (int i = 0; i < line.length(); ++i) {
@@ -52,12 +54,14 @@ public class Csv {
                     quotesAmount++;
 
                     if (i == line.length() - 1) {
-                        if (quotesAmount % 2 == 0 && isLineBreak) {
-                            writer.print("<br>");
-                        } else {
+                        {
                             writer.println("</td>");
-                            writer.println(INDENT + "</tr>");
-                            isLineBreak = false;
+                            writer.print(INDENT);
+                            writer.println("</tr>");
+
+                            if (quotesAmount % 2 != 0) {
+                                isLineBreak = false;
+                            }
                         }
 
                         quotesAmount = 0;
@@ -67,23 +71,21 @@ public class Csv {
                         quotesAmount++;
                     }
                 } else if (currentCharacter == ',') {
-                    if (i == 0) {
-                        writer.println("</td>");
-                        writer.print(INDENT.repeat(2) + "<td>");
-                    } else if (quotesAmount % 2 != 0) {
+                    if (quotesAmount % 2 != 0) {
                         writer.print(currentCharacter);
-
-                        if (i == line.length() - 1) {
-                            writer.print("<br>");
-                            isLineBreak = true;
-                        }
                     } else if (i == line.length() - 1 && !isLineBreak) {
-                        writer.println("</td>" + newLine + INDENT.repeat(2) + "<td></td>");
-                        writer.println(INDENT + "</tr>");
+                        writer.println("</td>");
+                        writer.print(doubleIndent);
+                        writer.println("<td></td>");
+                        writer.print(INDENT);
+                        writer.println("</tr>");
+
                         quotesAmount = 0;
                     } else {
                         writer.println("</td>");
-                        writer.print(INDENT.repeat(2) + "<td>");
+                        writer.print(doubleIndent);
+                        writer.print("<td>");
+
                         quotesAmount = 0;
                     }
                 } else if (i == line.length() - 1) {
@@ -91,16 +93,19 @@ public class Csv {
 
                     if (!isLineBreak && quotesAmount % 2 == 0) {
                         writer.println("</td>");
-                        writer.println(INDENT + "</tr>");
+                        writer.print(INDENT);
+                        writer.println("</tr>");
 
                         quotesAmount = 0;
-                    } else {
-                        writer.print("<br>");
-                        isLineBreak = true;
                     }
                 } else {
                     writer.print(currentCharacter);
                 }
+            }
+
+            if (quotesAmount % 2 != 0 || (quotesAmount == 0 && isLineBreak)) {
+                writer.print("<br>");
+                isLineBreak = true;
             }
         }
 
