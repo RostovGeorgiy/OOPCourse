@@ -6,12 +6,8 @@ import java.io.*;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            if (args.length != 2) {
-                throw new IllegalArgumentException("Program takes 2 String arguments: path to source CSV file, and path to destination HTML file.");
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
+        if (args.length != 2) {
+            System.out.println("Program takes 2 String arguments: path to source CSV file, and path to destination HTML file.");
             return;
         }
 
@@ -20,7 +16,7 @@ public class Main {
             Csv.convertCsvToHtml(reader, writer);
         } catch (FileNotFoundException e) {
             System.out.println("File not found: " + e.getMessage());
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             System.out.println("An exception has occurred: " + e.getMessage());
         }
     }

@@ -18,23 +18,21 @@ public class Csv {
                 <h1>HTML file containing table converted from CSV file.</h1>
                 <table border="1">""");
 
-        boolean isLineBreak = false;
+        boolean isQuotesCell = false;
 
         String line;
         String doubleIndent = INDENT.repeat(2);
 
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) {
-                if (isLineBreak) {
+                if (isQuotesCell) {
                     writer.print("<br>");
                 }
 
                 continue;
             }
 
-            int quotesAmount = 0;
-
-            if (!isLineBreak) {
+            if (!isQuotesCell) {
                 writer.print(INDENT);
                 writer.println("<tr>");
                 writer.print(doubleIndent);
@@ -51,61 +49,49 @@ public class Csv {
                 } else if (currentCharacter == '&') {
                     writer.print("&amp;");
                 } else if (currentCharacter == '"') {
-                    quotesAmount++;
+                    if (isQuotesCell) {
+                        if (i != line.length() - 1 && line.charAt(i + 1) == '"') {
+                            writer.print(currentCharacter);
+                            ++i;
+                        } else {
+                            isQuotesCell = false;
 
-                    if (i == line.length() - 1) {
-                        {
-                            writer.println("</td>");
-                            writer.print(INDENT);
-                            writer.println("</tr>");
-
-                            if (quotesAmount % 2 != 0) {
-                                isLineBreak = false;
+                            if (i == line.length() - 1) {
+                                writer.println("</td>");
+                                writer.print(INDENT);
+                                writer.println("</tr>");
                             }
                         }
-
-                        quotesAmount = 0;
-                    } else if (line.charAt(i + 1) == '"') {
-                        writer.print(currentCharacter);
-                        ++i;
-                        quotesAmount++;
+                    } else {
+                        isQuotesCell = true;
                     }
                 } else if (currentCharacter == ',') {
-                    if (quotesAmount % 2 != 0) {
+                    if (isQuotesCell) {
                         writer.print(currentCharacter);
-                    } else if (i == line.length() - 1 && !isLineBreak) {
+                    } else if (i == line.length() - 1) {
                         writer.println("</td>");
                         writer.print(doubleIndent);
                         writer.println("<td></td>");
                         writer.print(INDENT);
                         writer.println("</tr>");
-
-                        quotesAmount = 0;
                     } else {
                         writer.println("</td>");
                         writer.print(doubleIndent);
                         writer.print("<td>");
-
-                        quotesAmount = 0;
                     }
                 } else if (i == line.length() - 1) {
                     writer.print(currentCharacter);
 
-                    if (!isLineBreak && quotesAmount % 2 == 0) {
+                    if (!isQuotesCell) {
                         writer.println("</td>");
                         writer.print(INDENT);
                         writer.println("</tr>");
-
-                        quotesAmount = 0;
+                    } else {
+                        writer.print("<br>");
                     }
                 } else {
                     writer.print(currentCharacter);
                 }
-            }
-
-            if (quotesAmount % 2 != 0 || (quotesAmount == 0 && isLineBreak)) {
-                writer.print("<br>");
-                isLineBreak = true;
             }
         }
 
