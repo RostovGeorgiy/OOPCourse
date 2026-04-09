@@ -55,12 +55,6 @@ public class Csv {
                             ++i;
                         } else {
                             isQuotesCell = false;
-
-                            if (i == line.length() - 1) {
-                                writer.println("</td>");
-                                writer.print(INDENT);
-                                writer.println("</tr>");
-                            }
                         }
                     } else {
                         isQuotesCell = true;
@@ -68,20 +62,16 @@ public class Csv {
                 } else if (currentCharacter == ',') {
                     if (isQuotesCell) {
                         writer.print(currentCharacter);
-                    } else if (i == line.length() - 1) {
-                        writer.println("</td>");
-                        writer.print(doubleIndent);
-                        writer.println("<td></td>");
-                        writer.print(INDENT);
-                        writer.println("</tr>");
                     } else {
                         writer.println("</td>");
                         writer.print(doubleIndent);
                         writer.print("<td>");
                     }
-                } else if (i == line.length() - 1) {
+                } else {
                     writer.print(currentCharacter);
+                }
 
+                if (i == line.length() - 1) {
                     if (!isQuotesCell) {
                         writer.println("</td>");
                         writer.print(INDENT);
@@ -89,8 +79,6 @@ public class Csv {
                     } else {
                         writer.print("<br>");
                     }
-                } else {
-                    writer.print(currentCharacter);
                 }
             }
         }

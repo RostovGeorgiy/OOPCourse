@@ -16,8 +16,10 @@ public class Main {
             Csv.convertCsvToHtml(reader, writer);
         } catch (FileNotFoundException e) {
             System.out.println("File not found: " + e.getMessage());
-        } catch (IOException | RuntimeException e) {
-            System.out.println("An exception has occurred: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("An IO exception has occurred: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
