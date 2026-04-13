@@ -1,24 +1,31 @@
-package ru.academits.rostov.temperatureconversion.view;
+package ru.academits.rostov.temperature.view;
 
-import ru.academits.rostov.temperatureconversion.model.TemperatureScales;
-import ru.academits.rostov.temperatureconversion.presenter.Presenter;
+import ru.academits.rostov.temperature.model.TemperatureScale;
+import ru.academits.rostov.temperature.presenter.Presenter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class DesktopView implements View {
-    private final TemperatureScales[] scales;
-
-    public DesktopView(TemperatureScales[] scales) {
-        this.scales = scales;
-    }
+    private final TemperatureScale[] scales;
 
     private Presenter presenter;
     private JLabel resultLabel;
 
-    double inputTemperature;
-    private TemperatureScales inputScale;
-    private TemperatureScales outputScale;
+    private double inputTemperature;
+    private TemperatureScale inputScale;
+    private TemperatureScale outputScale;
+
+    public DesktopView(TemperatureScale[] scales) {
+        Objects.requireNonNull(scales, "scales array must not be null");
+
+        if (scales.length == 0) {
+            throw new IllegalArgumentException("scales array must not be empty");
+        }
+
+        this.scales = (scales);
+    }
 
     public void start() {
         SwingUtilities.invokeLater(() -> {
@@ -30,20 +37,25 @@ public class DesktopView implements View {
             frame.setLayout(new FlowLayout());
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            JComboBox<TemperatureScales> inputScalesComboBox = new JComboBox<>(scales);
-
-            JComboBox<TemperatureScales> convertToScalesComboBox = new JComboBox<>(scales);
+            JComboBox<TemperatureScale> inputScalesComboBox = new JComboBox<>(scales);
+            JComboBox<TemperatureScale> convertToScalesComboBox = new JComboBox<>(scales);
 
             JTextField inputTemperatureTextField = new JTextField(10);
-            inputTemperatureTextField.setMaximumSize(new Dimension(100, 30));
+            inputTemperatureTextField.setMaximumSize(new Dimension(235, 30));
             inputTemperatureTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             JButton convertButton = new JButton("Convert temperature");
 
             convertButton.addActionListener(a -> {
+                String inputString = inputTemperatureTextField.getText();
+
+                if (!isNumeric(inputString)) {
+                    throw new IllegalArgumentException("Input value must not be empty and must be a valid number");
+                }
+
                 inputTemperature = Double.parseDouble(inputTemperatureTextField.getText());
-                inputScale = (TemperatureScales) inputScalesComboBox.getSelectedItem();
-                outputScale = (TemperatureScales) convertToScalesComboBox.getSelectedItem();
+                inputScale = (TemperatureScale) inputScalesComboBox.getSelectedItem();
+                outputScale = (TemperatureScale) convertToScalesComboBox.getSelectedItem();
                 presenter.convert();
             });
 
@@ -68,7 +80,7 @@ public class DesktopView implements View {
             scaleSelectionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             mainPanel.add(scaleSelectionPanel);
-            mainPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+            mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
             mainPanel.add(convertButton);
 
             scaleSelectionPanel.add(inputLabel);
@@ -96,22 +108,26 @@ public class DesktopView implements View {
     }
 
     @Override
-    public void showConvertedTemperature(String convertedTemperature, String outputScale) {
+    public void showConvertedTemperature(double convertedTemperature, String outputScale) {
         resultLabel.setText("Temperature in " + outputScale + ": " + convertedTemperature);
     }
 
     @Override
-    public double getInput() {
+    public double getInputTemperatureValue() {
         return inputTemperature;
     }
 
     @Override
-    public TemperatureScales getInputScale() {
+    public TemperatureScale getInputScale() {
         return inputScale;
     }
 
     @Override
-    public TemperatureScales getOutputScale() {
+    public TemperatureScale getOutputScale() {
         return outputScale;
+    }
+
+    private boolean isNumeric(String inputString) {
+        return inputString != null && inputString.matches("-?\\d+(\\.\\d+)?");
     }
 }
