@@ -7,13 +7,12 @@ import java.io.*;
 public class Main {
     public static void main(String[] args) {
         if (args.length != 2) {
-            System.out.println("Program takes 2 String arguments: path to source CSV file, and path to destination HTML file.");
+            System.out.println("Incorrect amount of arguments passed to the program. Program takes 2 String arguments: path to source CSV file, and path to destination HTML file.");
             return;
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(args[0]));
-             PrintWriter writer = new PrintWriter(args[1])) {
-            Csv.convertCsvToHtml(reader, writer);
+        try {
+            Csv.convertCsvToHtml(args[0], args[1]);
         } catch (FileNotFoundException e) {
             System.out.println("File not found: " + e.getMessage());
         } catch (IOException e) {

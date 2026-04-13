@@ -5,87 +5,89 @@ import java.io.*;
 public class Csv {
     private static final String INDENT = "    ";
 
-    public static void convertCsvToHtml(BufferedReader reader, PrintWriter writer) throws IOException {
-        writer.println("""
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>CSV to HTML.</title>
-                </head>
-                <body>
-                <h1>HTML file containing table converted from CSV file.</h1>
-                <table border="1">""");
+    public static void convertCsvToHtml(String inputFilePath, String outputFilePath) throws Exception {
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+             PrintWriter writer = new PrintWriter(outputFilePath)) {
 
-        boolean isQuotesCell = false;
+            writer.println("""
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>CSV to HTML.</title>
+                    </head>
+                    <body>
+                    <h1>HTML file containing table converted from CSV file.</h1>
+                    <table border="1">""");
 
-        String line;
-        String doubleIndent = INDENT.repeat(2);
+            boolean isQuotesCell = false;
 
-        while ((line = reader.readLine()) != null) {
-            if (line.isEmpty()) {
-                if (isQuotesCell) {
-                    writer.print("<br>");
-                }
+            String line;
+            String doubleIndent = INDENT.repeat(2);
 
-                continue;
-            }
-
-            if (!isQuotesCell) {
-                writer.print(INDENT);
-                writer.println("<tr>");
-                writer.print(doubleIndent);
-                writer.print("<td>");
-            }
-
-            for (int i = 0; i < line.length(); ++i) {
-                char currentCharacter = line.charAt(i);
-
-                if (currentCharacter == '<') {
-                    writer.print("&lt;");
-                } else if (currentCharacter == '>') {
-                    writer.print("&gt;");
-                } else if (currentCharacter == '&') {
-                    writer.print("&amp;");
-                } else if (currentCharacter == '"') {
+            while ((line = reader.readLine()) != null) {
+                if (line.isEmpty()) {
                     if (isQuotesCell) {
-                        if (i != line.length() - 1 && line.charAt(i + 1) == '"') {
-                            writer.print(currentCharacter);
-                            ++i;
-                        } else {
-                            isQuotesCell = false;
-                        }
-                    } else {
-                        isQuotesCell = true;
-                    }
-                } else if (currentCharacter == ',') {
-                    if (isQuotesCell) {
-                        writer.print(currentCharacter);
-                    } else {
-                        writer.println("</td>");
-                        writer.print(doubleIndent);
-                        writer.print("<td>");
-                    }
-                } else {
-                    writer.print(currentCharacter);
-                }
-
-                if (i == line.length() - 1) {
-                    if (!isQuotesCell) {
-                        writer.println("</td>");
-                        writer.print(INDENT);
-                        writer.println("</tr>");
-                    } else {
                         writer.print("<br>");
                     }
+
+                    continue;
+                }
+
+                if (!isQuotesCell) {
+                    writer.print(INDENT);
+                    writer.println("<tr>");
+                    writer.print(doubleIndent);
+                    writer.print("<td>");
+                }
+
+                for (int i = 0; i < line.length(); ++i) {
+                    char currentCharacter = line.charAt(i);
+
+                    if (currentCharacter == '<') {
+                        writer.print("&lt;");
+                    } else if (currentCharacter == '>') {
+                        writer.print("&gt;");
+                    } else if (currentCharacter == '&') {
+                        writer.print("&amp;");
+                    } else if (currentCharacter == '"') {
+                        if (isQuotesCell) {
+                            if (i != line.length() - 1 && line.charAt(i + 1) == '"') {
+                                writer.print(currentCharacter);
+                                ++i;
+                            } else {
+                                isQuotesCell = false;
+                            }
+                        } else {
+                            isQuotesCell = true;
+                        }
+                    } else if (currentCharacter == ',') {
+                        if (isQuotesCell) {
+                            writer.print(currentCharacter);
+                        } else {
+                            writer.println("</td>");
+                            writer.print(doubleIndent);
+                            writer.print("<td>");
+                        }
+                    } else {
+                        writer.print(currentCharacter);
+                    }
+                }
+
+                if (!isQuotesCell) {
+                    writer.println("</td>");
+                    writer.print(INDENT);
+                    writer.println("</tr>");
+                } else {
+                    writer.print("<br>");
                 }
             }
-        }
 
-        writer.print("""
-                </table>
-                </body>
-                </html>""");
+            writer.print("""
+                    </table>
+                    </body>
+                    </html>""");
+        }
     }
 }
