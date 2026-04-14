@@ -213,7 +213,7 @@ public class MinesweeperModel implements Model {
 
     @Override
     public void writeScore(String playerName) {
-        File file = new File(highScoreFilePath);
+        File file = new File(String.valueOf(scoresFileInputStream));
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(String.valueOf(scoresFileInputStream), true))) {
 
