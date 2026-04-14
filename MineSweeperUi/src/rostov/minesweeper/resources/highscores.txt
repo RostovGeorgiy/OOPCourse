@@ -1,0 +1,5 @@
+Player name:  Score:
+------------------------
+
+player1:	 1
+player2:	 6
