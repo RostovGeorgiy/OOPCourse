@@ -2,13 +2,13 @@ package ru.academits.rostov.temperature.model;
 
 public class CelsiusScale implements TemperatureScale {
     @Override
-    public double convertToKelvin(double temperatureValue) {
-        return temperatureValue + 273.15;
+    public double convertToKelvin(double temperature) {
+        return temperature + 273.15;
     }
 
     @Override
-    public double convertFromKelvin(double kelvinTemperatureValue) {
-        return kelvinTemperatureValue - 273.15;
+    public double convertFromKelvin(double kelvinTemperature) {
+        return kelvinTemperature - 273.15;
     }
 
     @Override

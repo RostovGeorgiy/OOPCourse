@@ -6,13 +6,15 @@ import ru.academits.rostov.temperature.presenter.Presenter;
 public interface View {
     void start();
 
+    void showIncorrectInputMessage();
+
     void setPresenter(Presenter presenter);
 
-    double getInputTemperatureValue();
+    double getInputTemperature();
 
     TemperatureScale getInputScale();
 
     TemperatureScale getOutputScale();
 
-    void showConvertedTemperature(double convertedValueString, String outputScale);
+    void showConvertedTemperature(double convertedTemperature, TemperatureScale outputScale);
 }

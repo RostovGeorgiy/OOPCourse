@@ -1,7 +1,7 @@
 package ru.academits.rostov.temperature.model;
 
 public interface TemperatureScale {
-    double convertToKelvin(double temperatureValue);
+    double convertToKelvin(double temperature);
 
-    double convertFromKelvin(double kelvinTemperatureValue);
+    double convertFromKelvin(double kelvinTemperature);
 }
