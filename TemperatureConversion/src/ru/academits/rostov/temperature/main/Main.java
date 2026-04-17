@@ -8,8 +8,8 @@ import ru.academits.rostov.temperature.view.View;
 public class Main {
     public static void main(String[] args) {
         TemperatureConverter converter = new TemperatureConverter();
-        TemperatureScale[] scales = {new CelsiusScale(), new FahrenheitScale(), new KelvinScale()};
-        View view = new DesktopView(scales);
+
+        View view = new DesktopView();
 
         Presenter presenter = new Presenter(converter, view);
         presenter.start();

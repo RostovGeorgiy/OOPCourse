@@ -8,8 +8,6 @@ import java.awt.*;
 import java.util.Objects;
 
 public class DesktopView implements View {
-    private final TemperatureScale[] scales;
-
     private Presenter presenter;
 
     private JLabel resultLabel;
@@ -21,20 +19,8 @@ public class DesktopView implements View {
 
     private JFrame frame;
 
-    public DesktopView(TemperatureScale[] scales) {
-        Objects.requireNonNull(scales, "Scales array must not be null");
-
-        if (scales.length == 0) {
-            throw new IllegalArgumentException("Scales array must not be empty");
-        }
-
-        this.scales = scales;
-    }
-
     public void start() {
-        if (presenter == null) {
-            throw new NullPointerException("Presenter must not be null.");
-        }
+        Objects.requireNonNull(presenter, "Presenter must not be null.");
 
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Temperature converter");
@@ -45,6 +31,8 @@ public class DesktopView implements View {
             frame.setLayout(new FlowLayout());
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+            TemperatureScale[] scales = presenter.getScales().toArray(TemperatureScale[]::new);
+
             JComboBox<TemperatureScale> inputScalesComboBox = new JComboBox<>(scales);
             JComboBox<TemperatureScale> outputScalesComboBox = new JComboBox<>(scales);
 
@@ -54,7 +42,7 @@ public class DesktopView implements View {
 
             JButton convertButton = new JButton("Convert temperature");
 
-            convertButton.addActionListener(a -> {
+            convertButton.addActionListener(_ -> {
                 try {
                     inputTemperature = Double.parseDouble(inputTemperatureTextField.getText());
                 } catch (Exception e) {
