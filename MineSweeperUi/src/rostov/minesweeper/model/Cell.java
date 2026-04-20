@@ -5,7 +5,7 @@ public class Cell {
     private boolean isMine;
     private boolean isFlagged;
     private int nearbyMinesAmount;
-    
+
     public boolean getRevealed() {
         return isRevealed;
     }
