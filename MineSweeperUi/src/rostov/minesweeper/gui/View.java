@@ -1,6 +1,6 @@
 package rostov.minesweeper.gui;
 
-import rostov.minesweeper.Presenter;
+import rostov.minesweeper.presenter.Presenter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,19 +9,21 @@ import java.util.ArrayList;
 public interface View {
     void start();
 
+    void showInputIsNonNumericMessage();
+
     void showInputErrorMessage();
 
     void showBoardSizeErrorMessage();
 
-    void setController(Presenter presenter);
+    void setPresenter(Presenter presenter);
 
-    void showToggledFlag(JButton cell, ImageIcon icon);
+    void showToggledFlag(JButton cell);
 
     void showGameOverMessage(String s);
 
     void revealAllMines(ArrayList<Point> minesPositions);
 
-    void resetBoard();
+    void resetBoard(int boardRowsAmount, int boardColumnsAmount);
 
     void updateCell(int row, int column, String s);
 

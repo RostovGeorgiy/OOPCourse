@@ -1,4 +1,4 @@
-package rostov.minesweeper;
+package rostov.minesweeper.model;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,15 +6,9 @@ import java.util.ArrayList;
 
 public interface Model {
 
-    void toggleFlag(JButton cell, int remainingFlags);
-
-    ImageIcon getFlagIcon();
-
-    boolean isRevealed(JButton cell);
+    boolean toggleFlag(JButton cell, int remainingFlags);
 
     boolean isRevealed(int row, int column);
-
-    boolean isFlagged(JButton cell);
 
     boolean isFlagged(int newRow, int newColumn);
 
@@ -22,9 +16,13 @@ public interface Model {
 
     ArrayList<Point> getMines();
 
-    void resetBoard();
+    void resetBoard(int rowsAmount, int columnsAmount);
 
-    void setMines(int rowsAmount, int columnsAmount, int minesAmount);
+    int getRowsAmount();
+
+    int getColumnsAmount();
+
+    void setMines(int rowsAmount, int columnsAmount, int minesAmount, int clickedCellRow, int clickedCellColumn);
 
     default int countNearbyMines(int row, int column) {
         return 0;
@@ -34,7 +32,6 @@ public interface Model {
 
     void revealNearbyCells(int row, int column);
 
-
     void setRevealed(int row, int column);
 
     boolean checkWin();
@@ -42,4 +39,6 @@ public interface Model {
     void writeScore(String playerName);
 
     String readScores();
+
+    int getMaxBoardDimension();
 }
