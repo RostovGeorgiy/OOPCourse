@@ -4,7 +4,7 @@ import ru.academits.rostov.temperature.model.TemperatureConverter;
 import ru.academits.rostov.temperature.model.TemperatureScale;
 import ru.academits.rostov.temperature.view.View;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Presenter {
@@ -28,15 +28,7 @@ public class Presenter {
         view.showConvertedTemperature(converter.convert(view.getInputTemperature(), view.getInputScale(), outputScale), outputScale);
     }
 
-    public ArrayList<TemperatureScale> getScales() {
-        ArrayList<TemperatureScale> scales = converter.getScales();
-
-        Objects.requireNonNull(scales, "Scales list is null.");
-
-        if (scales.isEmpty()) {
-            throw new IllegalArgumentException("Scales list is empty.");
-        }
-
-        return scales;
+    public List<TemperatureScale> getScales() {
+        return converter.getScales();
     }
 }

@@ -1,17 +1,23 @@
 package ru.academits.rostov.temperature.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class TemperatureConverter {
-    private ArrayList<TemperatureScale> scales = new ArrayList<>(Arrays.asList(new CelsiusScale(), new FahrenheitScale(), new KelvinScale()));
+    private final List<TemperatureScale> scales;
 
-    public ArrayList<TemperatureScale> getScales() {
-        return scales;
+    public TemperatureConverter(List<TemperatureScale> scales) {
+        this.scales = scales;
     }
 
-    public void setScales(ArrayList<TemperatureScale> scales) {
-        this.scales = scales;
+    public List<TemperatureScale> getScales() {
+        Objects.requireNonNull(scales, "Scales list is null.");
+
+        if (scales.isEmpty()) {
+            throw new IllegalArgumentException("Scales list is empty.");
+        }
+
+        return scales;
     }
 
     public double convert(double inputTemperature, TemperatureScale inputScale, TemperatureScale outputScale) {

@@ -19,7 +19,15 @@ public class DesktopView implements View {
 
     private JFrame frame;
 
+    boolean isStartCalled = false;
+
     public void start() {
+        if (isStartCalled) {
+            throw new IllegalStateException("Start method was already called.");
+        }
+
+        isStartCalled = true;
+
         Objects.requireNonNull(presenter, "Presenter must not be null.");
 
         SwingUtilities.invokeLater(() -> {
