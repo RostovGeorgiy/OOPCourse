@@ -7,17 +7,17 @@ public class TemperatureConverter {
     private final List<TemperatureScale> scales;
 
     public TemperatureConverter(List<TemperatureScale> scales) {
-        this.scales = scales;
-    }
-
-    public List<TemperatureScale> getScales() {
         Objects.requireNonNull(scales, "Scales list is null.");
 
         if (scales.isEmpty()) {
             throw new IllegalArgumentException("Scales list is empty.");
         }
 
-        return scales;
+        this.scales = List.copyOf(scales);
+    }
+
+    public List<TemperatureScale> getScales() {
+        return List.copyOf(scales);
     }
 
     public double convert(double inputTemperature, TemperatureScale inputScale, TemperatureScale outputScale) {
