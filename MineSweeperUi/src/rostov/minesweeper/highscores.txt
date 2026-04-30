@@ -1,5 +1,0 @@
-Player name1:  Score(seconds to beat the game):
-------------------------
-
-Player1:	 6
-Player2:	 8

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public interface View {
     void start();
 
-    void showInputIsNonNumericMessage();
+    ImageIcon setIconPath(String iconPath);
 
     void showInputErrorMessage();
 
@@ -19,13 +19,13 @@ public interface View {
 
     void showToggledFlag(JButton cell);
 
-    void showGameOverMessage(String s);
-
     void revealAllMines(ArrayList<Point> minesPositions);
 
     void resetBoard(int boardRowsAmount, int boardColumnsAmount);
 
     void updateCell(int row, int column, String s);
+
+    ImageIcon scaleIcon(ImageIcon sourceIcon, int cellWidth, int cellHeight);
 
     void showAboutMessage();
 
@@ -34,4 +34,10 @@ public interface View {
     void exitGame();
 
     void showWinMessage(String s);
+
+    void showError(String exceptionMessage);
+
+    void showHighlightedMine(int row, int column);
+
+    void stopTimer();
 }

@@ -4,6 +4,7 @@ public class Cell {
     private boolean isRevealed;
     private boolean isMine;
     private boolean isFlagged;
+    private boolean isEnabled;
     private int nearbyMinesAmount;
 
     public boolean getRevealed() {
@@ -28,6 +29,14 @@ public class Cell {
 
     public void setFlagged(boolean isFlagged) {
         this.isFlagged = isFlagged;
+    }
+
+    public boolean getEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
     }
 
     public int getNearbyMinesAmount() {

@@ -1,5 +1,7 @@
 package rostov.minesweeper.model;
 
+import rostov.minesweeper.presenter.ExceptionListener;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -24,9 +26,9 @@ public interface Model {
 
     void setMines(int rowsAmount, int columnsAmount, int minesAmount, int clickedCellRow, int clickedCellColumn);
 
-    default int countNearbyMines(int row, int column) {
-        return 0;
-    }
+    int countNearbyMines(int row, int column);
+
+    int countNearbyFlags(int row, int column);
 
     void countAllNearbyMines();
 
@@ -36,9 +38,13 @@ public interface Model {
 
     boolean checkWin();
 
-    void writeScore(String playerName);
+    void writeScore(String playerName, String timeElapsed, String difficulty, ExceptionListener listener);
 
-    String readScores();
+    void readScores(String difficulty, ExceptionListener listener);
 
     int getMaxBoardDimension();
+
+    void disableBoard();
+
+    boolean isEnabled(int row, int column);
 }

@@ -1,14 +1,16 @@
 package rostov.minesweeper.model;
 
+import rostov.minesweeper.presenter.ExceptionListener;
+
 import javax.swing.*;
 import java.awt.*;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class MinesweeperModel implements Model {
-    private static final String scoresFilePath = "MineSweeperUi/src/rostov/minesweeper/highscores.txt";
+    private static final String beginnerScoresFilePath = "MineSweeperUi/src/rostov/minesweeper/beginnerHighscores.txt";
+    private static final String intermediateScoresFilePath = "MineSweeperUi/src/rostov/minesweeper/intermediateHighscores.txt";
+    private static final String expertScoresFilePath = "MineSweeperUi/src/rostov/minesweeper/expertHighscores.txt";
 
     private static final int maxBoardDimension = 30;
 
@@ -16,9 +18,6 @@ public class MinesweeperModel implements Model {
 
     private int rowsAmount = 9;
     private int columnsAmount = 9;
-
-    private Instant startTime;
-    private long gameScore;
 
     @Override
     public int getRowsAmount() {
@@ -101,17 +100,17 @@ public class MinesweeperModel implements Model {
         this.rowsAmount = rowsAmount;
         this.columnsAmount = columnsAmount;
 
-        startTime = Instant.now();
-
         board = new Cell[rowsAmount][columnsAmount];
 
         for (int row = 0; row < board.length; ++row) {
             for (int column = 0; column < board[0].length; ++column) {
                 board[row][column] = new Cell();
+                board[row][column].setEnabled(true);
             }
         }
     }
 
+    @Override
     public int countNearbyMines(int row, int column) {
         int count = 0;
 
@@ -119,6 +118,27 @@ public class MinesweeperModel implements Model {
             for (int c = column - 1; c <= column + 1; c++) {
                 if (r >= 0 && r < rowsAmount && c >= 0 && c < columnsAmount) {
                     if (board[r][c].getMine()) {
+                        count++;
+                    }
+                }
+            }
+        }
+
+        if (board[row][column].getMine()) {
+            count--;
+        }
+
+        return count;
+    }
+
+    @Override
+    public int countNearbyFlags(int row, int column) {
+        int count = 0;
+
+        for (int r = row - 1; r <= row + 1; r++) {
+            for (int c = column - 1; c <= column + 1; c++) {
+                if (r >= 0 && r < rowsAmount && c >= 0 && c < columnsAmount) {
+                    if (board[r][c].getFlagged()) {
                         count++;
                     }
                 }
@@ -177,25 +197,46 @@ public class MinesweeperModel implements Model {
             }
         }
 
-        Instant winTime = Instant.now();
-
-        gameScore = Duration.between(startTime, winTime).getSeconds();
-
         return true;
     }
 
     @Override
-    public void writeScore(String playerName) {
-        WriteScore.write(scoresFilePath, playerName, gameScore);
+    public void writeScore(String playerName, String timeElapsed, String difficulty, ExceptionListener listener) {
+        switch (difficulty) {
+            case "beginner" ->
+                    Score.write(beginnerScoresFilePath, playerName, Integer.parseInt(timeElapsed), difficulty, listener);
+            case "intermediate" ->
+                    Score.write(intermediateScoresFilePath, playerName, Integer.parseInt(timeElapsed), difficulty, listener);
+            case "expert" ->
+                    Score.write(expertScoresFilePath, playerName, Integer.parseInt(timeElapsed), difficulty, listener);
+        }
     }
 
     @Override
-    public String readScores() {
-        return ReadScore.read(scoresFilePath);
+    public void readScores(String difficulty, ExceptionListener listener) {
+        switch (difficulty) {
+            case "beginner" -> Score.read(beginnerScoresFilePath, listener);
+            case "intermediate" -> Score.read(intermediateScoresFilePath, listener);
+            case "expert" -> Score.read(expertScoresFilePath, listener);
+        }
     }
 
     @Override
     public int getMaxBoardDimension() {
         return maxBoardDimension;
+    }
+
+    @Override
+    public void disableBoard() {
+        for (int row = 0; row < rowsAmount; ++row) {
+            for (int column = 0; column < columnsAmount; ++column) {
+                board[row][column].setEnabled(false);
+            }
+        }
+    }
+
+    @Override
+    public boolean isEnabled(int row, int column) {
+        return board[row][column].getEnabled();
     }
 }

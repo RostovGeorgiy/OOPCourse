@@ -3,6 +3,7 @@ package rostov.minesweeper.gui;
 import rostov.minesweeper.presenter.Presenter;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -14,25 +15,32 @@ public class DesktopView implements View {
 
     private JButton[][] cells;
 
-    private final ImageIcon minesweeperIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/minesweeper.png")));
+    private ImageIcon minesweeperIcon;
 
-    private final ImageIcon mineIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/mine.png")));
-    private final ImageIcon flagIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/flag.png")));
+    private ImageIcon mineIcon;
+    private ImageIcon highlightedMineIcon;
+    private ImageIcon flagIcon;
 
-    private final ImageIcon oneIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/1.png")));
-    private final ImageIcon twoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/2.png")));
-    private final ImageIcon threeIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/3.png")));
-    private final ImageIcon fourIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/4.png")));
-    private final ImageIcon fiveIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/5.png")));
-    private final ImageIcon sixIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/6.png")));
-    private final ImageIcon sevenIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/7.png")));
-    private final ImageIcon eightIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/rostov/minesweeper/resources/8.png")));
+    private ImageIcon oneIcon;
+    private ImageIcon twoIcon;
+    private ImageIcon threeIcon;
+    private ImageIcon fourIcon;
+    private ImageIcon fiveIcon;
+    private ImageIcon sixIcon;
+    private ImageIcon sevenIcon;
+    private ImageIcon eightIcon;
 
     private int rowsAmount = 9;
     private int columnsAmount = 9;
     private int minesAmount = 10;
 
     private int remainingFlags;
+
+    private String difficulty = "beginner";
+
+    private Timer timer;
+    private JLabel timerLabel;
+    private int gameTime = 1;
 
     private final JLabel remainingFlagsLabel = new JLabel();
     private JPanel minesweeperBoard = new JPanel();
@@ -41,29 +49,89 @@ public class DesktopView implements View {
     private MouseListener cellClickedListener;
     private MouseListener cellFlaggedListener;
 
+    private boolean isStarted;
+
     public void start() {
+        if (isStarted) {
+            throw new IllegalStateException("Start method was already called.");
+        }
+
+        isStarted = true;
+
         Objects.requireNonNull(presenter, "Presenter must not be null.");
 
         SwingUtilities.invokeLater(() -> {
+            minesweeperIcon = setIconPath("/rostov/minesweeper/resources/minesweeper.png");
+            mineIcon = setIconPath("/rostov/minesweeper/resources/mine.png");
+            highlightedMineIcon = setIconPath("/rostov/minesweeper/resources/highlightedMine.png");
+            flagIcon = setIconPath("/rostov/minesweeper/resources/flag.png");
+            oneIcon = setIconPath("/rostov/minesweeper/resources/1.png");
+            twoIcon = setIconPath("/rostov/minesweeper/resources/2.png");
+            threeIcon = setIconPath("/rostov/minesweeper/resources/3.png");
+            fourIcon = setIconPath("/rostov/minesweeper/resources/4.png");
+            fiveIcon = setIconPath("/rostov/minesweeper/resources/5.png");
+            sixIcon = setIconPath("/rostov/minesweeper/resources/6.png");
+            sevenIcon = setIconPath("/rostov/minesweeper/resources/7.png");
+            eightIcon = setIconPath("/rostov/minesweeper/resources/8.png");
+
             frame = new JFrame("Minesweeper");
             frame.setIconImage(minesweeperIcon.getImage());
-            frame.setSize(700, 800);
+            frame.setSize(1000, 1200);
             frame.setLocationRelativeTo(null);
             frame.setLayout(new GridBagLayout());
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            frame.setMinimumSize(new Dimension(600, 700));
+            frame.setMinimumSize(new Dimension(800, 1000));
 
             JLabel rowsLabel = new JLabel("Input amount of rows:");
+            rowsLabel.setVisible(false);
+
             JTextField rowsTextField = new JTextField(2);
             rowsTextField.setText(String.valueOf(rowsAmount));
+            rowsTextField.setVisible(false);
+
+            ((AbstractDocument) rowsTextField.getDocument()).setDocumentFilter(new DocumentFilter() {
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                        throws BadLocationException {
+                    if (text.matches("\\d+")) {
+                        super.replace(fb, offset, length, text, attrs);
+                    }
+                }
+            });
 
             JLabel columnsLabel = new JLabel("Input amount of columns:");
+            columnsLabel.setVisible(false);
+
             JTextField columnsTextField = new JTextField(2);
             columnsTextField.setText(String.valueOf(columnsAmount));
+            columnsTextField.setVisible(false);
+
+            ((AbstractDocument) columnsTextField.getDocument()).setDocumentFilter(new DocumentFilter() {
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                        throws BadLocationException {
+                    if (text.matches("\\d+")) {
+                        super.replace(fb, offset, length, text, attrs);
+                    }
+                }
+            });
 
             JLabel minesLabel = new JLabel("Input amount of mines:");
+            minesLabel.setVisible(false);
+
             JTextField minesTextField = new JTextField(2);
             minesTextField.setText(String.valueOf(minesAmount));
+            minesTextField.setVisible(false);
+
+            ((AbstractDocument) minesTextField.getDocument()).setDocumentFilter(new DocumentFilter() {
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                        throws BadLocationException {
+                    if (text.matches("\\d+")) {
+                        super.replace(fb, offset, length, text, attrs);
+                    }
+                }
+            });
 
             JPanel optionsPanel = new JPanel();
 
@@ -77,13 +145,11 @@ public class DesktopView implements View {
             optionsPanel.add(columnsTextField);
             optionsPanel.add(minesLabel);
             optionsPanel.add(minesTextField);
-            optionsPanel.add(flagsCountInfoLabel);
-            optionsPanel.add(remainingFlagsLabel);
 
             GridBagConstraints optionsPanelConstraints = new GridBagConstraints();
 
             optionsPanelConstraints.gridx = 0;
-            optionsPanelConstraints.gridy = 1;
+            optionsPanelConstraints.gridy = 0;
             optionsPanelConstraints.weightx = 0.0;
             optionsPanelConstraints.weighty = 0.0;
             optionsPanelConstraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -92,43 +158,43 @@ public class DesktopView implements View {
 
             frame.add(optionsPanel, optionsPanelConstraints);
 
-            JButton startGameButton = new JButton("Start Game");
+            GridBagConstraints flagsPanelConstraints = new GridBagConstraints();
 
-            startGameButton.addActionListener(_ -> {
-                rowsAmount = Integer.parseInt(rowsTextField.getText());
-                columnsAmount = Integer.parseInt(columnsTextField.getText());
-                minesAmount = Integer.parseInt(minesTextField.getText());
+            JPanel flagsPanel = new JPanel();
 
-                if (rowsAmount <= 0 || columnsAmount <= 0 || minesAmount <= 0 || minesAmount >= rowsAmount * columnsAmount) {
-                    showInputErrorMessage();
+            flagsPanel.add(flagsCountInfoLabel);
+            flagsPanel.add(remainingFlagsLabel);
 
-                    rowsTextField.setText("");
-                    columnsTextField.setText("");
-                    minesTextField.setText("");
+            flagsPanelConstraints.gridx = 0;
+            flagsPanelConstraints.gridy = 1;
+            flagsPanelConstraints.weightx = 0.0;
+            flagsPanelConstraints.weighty = 0.0;
+            flagsPanelConstraints.gridwidth = GridBagConstraints.REMAINDER;
+            flagsPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
+            flagsPanelConstraints.anchor = GridBagConstraints.NORTH;
 
-                    return;
-                }
-
-                if (presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) {
-                    rowsAmount = 9;
-                    columnsAmount = 9;
-                    minesAmount = 10;
-                }
-
-                remainingFlags = minesAmount;
-                remainingFlagsLabel.setText("" + remainingFlags);
-
-                minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
-
-                presenter.startGame(rowsAmount, columnsAmount, minesAmount);
-            });
+            frame.add(flagsPanel, flagsPanelConstraints);
 
             cellClickedListener = new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e)) {
+                    if (timerLabel.getText().equals("0")) {
+                        timer.start();
+                    }
+
+                    if (SwingUtilities.isLeftMouseButton(e)) {
                         JButton cell = (JButton) e.getSource();
+
+                        if (!cell.isEnabled()) {
+                            return;
+                        }
+
                         presenter.cellClicked(cell);
+                    }
+
+                    if (SwingUtilities.isMiddleMouseButton(e)) {
+                        JButton cell = (JButton) e.getSource();
+                        presenter.cellMiddleClicked(cell);
                     }
                 }
             };
@@ -139,37 +205,41 @@ public class DesktopView implements View {
                     if (SwingUtilities.isRightMouseButton(e)) {
                         JButton flaggedCell = (JButton) e.getSource();
 
+                        if (!flaggedCell.isEnabled()) {
+                            return;
+                        }
+
                         remainingFlags = Integer.parseInt(remainingFlagsLabel.getText());
                         presenter.toggleFlag(flaggedCell, remainingFlags);
                     }
                 }
             };
 
-            JMenuBar gameMenuBar = new JMenuBar();
+            JLabel difficultyLabel = new JLabel("Difficulty: Beginner");
+            difficultyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
+            optionsPanel.add(difficultyLabel);
 
-            JMenu gameMenu = new JMenu("Menu");
+            JButton startCustomGameButton = new JButton("OK");
+            startCustomGameButton.setVisible(false);
+            optionsPanel.add(startCustomGameButton);
 
-            gameMenuBar.add(gameMenu);
+            startCustomGameButton.addActionListener(_ -> {
+                difficultyLabel.setText("Difficulty: Custom");
 
-            JMenuItem startGameMenu = new JMenuItem("StartGame");
-            startGameMenu.addActionListener(_ -> {
-                try {
-                    rowsAmount = Integer.parseInt(rowsTextField.getText());
-                    columnsAmount = Integer.parseInt(columnsTextField.getText());
-                    minesAmount = Integer.parseInt(minesTextField.getText());
-                } catch (Exception e) {
-                    showInputIsNonNumericMessage();
-                    return;
-                }
+                rowsAmount = Integer.parseInt(rowsTextField.getText());
+                columnsAmount = Integer.parseInt(columnsTextField.getText());
+                minesAmount = Integer.parseInt(minesTextField.getText());
 
-                if (rowsAmount <= 0 || columnsAmount <= 0 || minesAmount <= 0 || minesAmount >= rowsAmount * columnsAmount) {
+                if (minesAmount >= rowsAmount * columnsAmount) {
                     showInputErrorMessage();
 
-                    rowsTextField.setText("");
-                    columnsTextField.setText("");
-                    minesTextField.setText("");
+                    rowsTextField.setText("9");
+                    columnsTextField.setText("9");
+                    minesTextField.setText("10");
 
-                    return;
+                    rowsAmount = 9;
+                    columnsAmount = 9;
+                    minesAmount = 10;
                 }
 
                 if (presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) {
@@ -183,27 +253,210 @@ public class DesktopView implements View {
 
                 minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
 
-                presenter.startGame(rowsAmount, columnsAmount, minesAmount);
+                presenter.startGame(rowsAmount, columnsAmount, minesAmount, difficulty);
+            });
+
+
+            timerLabel = new JLabel("0");
+            timerLabel.setPreferredSize(new Dimension(100, 40));
+            timerLabel.setForeground(Color.RED);
+
+            timerLabel.setFont(new Font("Serif", Font.BOLD, 24));
+            optionsPanel.add(timerLabel);
+
+            ActionListener updateTimer = _ -> {
+                timerLabel.setText(String.valueOf(gameTime));
+                gameTime += 1;
+            };
+
+            timer = new Timer(1000, updateTimer);
+
+            JMenuBar gameMenuBar = new JMenuBar();
+
+            JMenu gameMenu = new JMenu("Menu");
+
+            gameMenuBar.add(gameMenu);
+
+            JMenuItem startGameMenu = new JMenuItem("StartGame");
+            startGameMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
+                    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+
+            startGameMenu.addActionListener(_ -> {
+                try {
+                    switch (difficulty) {
+                        case "beginner" -> {
+                            difficultyLabel.setText("Difficulty: Beginner");
+
+                            rowsAmount = 9;
+                            columnsAmount = 9;
+                            minesAmount = 10;
+                        }
+                        case "intermediate" -> {
+                            difficultyLabel.setText("Difficulty: Intermediate");
+
+                            rowsAmount = 16;
+                            columnsAmount = 16;
+                            minesAmount = 40;
+                        }
+                        case "expert" -> {
+                            difficultyLabel.setText("Difficulty: Expert");
+
+                            rowsAmount = 30;
+                            columnsAmount = 16;
+                            minesAmount = 99;
+                        }
+                        case "custom" -> {
+                            difficultyLabel.setText("Difficulty: Custom");
+
+                            rowsAmount = Integer.parseInt(rowsTextField.getText());
+                            columnsAmount = Integer.parseInt(columnsTextField.getText());
+                            minesAmount = Integer.parseInt(minesTextField.getText());
+                        }
+                    }
+                } catch (Exception e) {
+                    return;
+                }
+
+                if (minesAmount >= rowsAmount * columnsAmount) {
+                    showInputErrorMessage();
+
+                    rowsTextField.setText("9");
+                    columnsTextField.setText("9");
+                    minesTextField.setText("10");
+
+                    rowsAmount = 9;
+                    columnsAmount = 9;
+                    minesAmount = 10;
+                }
+
+                if (presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) {
+                    rowsAmount = 9;
+                    columnsAmount = 9;
+                    minesAmount = 10;
+                }
+
+                remainingFlags = minesAmount;
+                remainingFlagsLabel.setText("" + remainingFlags);
+
+                minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
+
+                presenter.startGame(rowsAmount, columnsAmount, minesAmount, difficulty);
             });
 
             startGameMenu.doClick();
 
             gameMenu.add(startGameMenu);
+            gameMenu.addSeparator();
 
             JMenuItem aboutMenu = new JMenuItem("About");
+            aboutMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
+                    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
             aboutMenu.addActionListener(_ -> presenter.about());
 
             gameMenu.add(aboutMenu);
+            gameMenu.addSeparator();
 
             JMenuItem highScoresMenu = new JMenuItem("HighScores");
             highScoresMenu.addActionListener(_ -> presenter.highScores());
+            highScoresMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+                    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
             gameMenu.add(highScoresMenu);
+            gameMenu.addSeparator();
 
             JMenuItem exitMenu = new JMenuItem("Exit");
             exitMenu.addActionListener(_ -> presenter.exitGame());
+            exitMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,
+                    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
             gameMenu.add(exitMenu);
+            gameMenu.addSeparator();
+
+            JMenu optionsMenu = new JMenu("Difficulty");
+            gameMenuBar.add(optionsMenu);
+
+            JRadioButtonMenuItem beginnerDifficultyButton = new JRadioButtonMenuItem("Beginner", true);
+            JRadioButtonMenuItem intermediateDifficultyButton = new JRadioButtonMenuItem("Intermediate");
+            JRadioButtonMenuItem expertDifficultyButton = new JRadioButtonMenuItem("Expert");
+            JRadioButtonMenuItem customDifficultyButton = new JRadioButtonMenuItem("Custom");
+
+            ButtonGroup group = new ButtonGroup();
+            group.add(beginnerDifficultyButton);
+            group.add(intermediateDifficultyButton);
+            group.add(expertDifficultyButton);
+            group.add(customDifficultyButton);
+
+            beginnerDifficultyButton.addActionListener(_ -> {
+                difficulty = "beginner";
+
+                rowsTextField.setVisible(false);
+                rowsLabel.setVisible(false);
+
+                columnsTextField.setVisible(false);
+                columnsLabel.setVisible(false);
+
+                minesTextField.setVisible(false);
+                minesLabel.setVisible(false);
+
+                startCustomGameButton.setVisible(false);
+            });
+
+            intermediateDifficultyButton.addActionListener(_ -> {
+                difficulty = "intermediate";
+
+                rowsTextField.setVisible(false);
+                rowsLabel.setVisible(false);
+
+                columnsTextField.setVisible(false);
+                columnsLabel.setVisible(false);
+
+                minesTextField.setVisible(false);
+                minesLabel.setVisible(false);
+
+                startCustomGameButton.setVisible(false);
+            });
+
+            expertDifficultyButton.addActionListener(_ -> {
+                difficulty = "expert";
+
+                rowsTextField.setVisible(false);
+                rowsLabel.setVisible(false);
+
+                columnsTextField.setVisible(false);
+                columnsLabel.setVisible(false);
+
+                minesTextField.setVisible(false);
+                minesLabel.setVisible(false);
+
+                startCustomGameButton.setVisible(false);
+            });
+
+            customDifficultyButton.addActionListener(_ -> {
+                difficulty = "custom";
+
+                rowsTextField.setVisible(true);
+                rowsLabel.setVisible(true);
+
+                columnsTextField.setVisible(true);
+                columnsLabel.setVisible(true);
+
+                minesTextField.setVisible(true);
+                minesLabel.setVisible(true);
+
+                startCustomGameButton.setVisible(true);
+            });
+
+            optionsMenu.add(beginnerDifficultyButton);
+            optionsMenu.addSeparator();
+
+            optionsMenu.add(intermediateDifficultyButton);
+            optionsMenu.addSeparator();
+
+            optionsMenu.add(expertDifficultyButton);
+            optionsMenu.addSeparator();
+
+            optionsMenu.add(customDifficultyButton);
+            optionsMenu.addSeparator();
 
             frame.setJMenuBar(gameMenuBar);
 
@@ -235,19 +488,18 @@ public class DesktopView implements View {
     }
 
     @Override
-    public void showInputIsNonNumericMessage() {
-        JOptionPane.showMessageDialog(frame, "Rows, columns, and mines amounts should be a valid number. ", "Input value is non numeric", JOptionPane.ERROR_MESSAGE);
+    public ImageIcon setIconPath(String iconPath) {
+        return new ImageIcon(Objects.requireNonNull(getClass().getResource(iconPath)));
     }
 
     @Override
     public void showInputErrorMessage() {
-        JOptionPane.showMessageDialog(frame, "Rows, columns, and mines amounts should be > 0. " +
-                "Mines amount should not be >= total cells amount.", "Input values error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Mines amount should not be >= total cells amount. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
     public void showBoardSizeErrorMessage() {
-        JOptionPane.showMessageDialog(frame, "Board should have up to 30 rows and columns. Default values used.", "Input values error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Board should have up to 30 rows and columns. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
@@ -258,7 +510,7 @@ public class DesktopView implements View {
     @Override
     public void showToggledFlag(JButton cell) {
         if (cell.getIcon() == null) {
-            cell.setIcon(flagIcon);
+            cell.setIcon(scaleIcon(flagIcon, cell.getWidth(), cell.getHeight()));
 
             remainingFlagsLabel.setText(String.valueOf(remainingFlags - 1));
         } else {
@@ -269,17 +521,10 @@ public class DesktopView implements View {
     }
 
     @Override
-    public void showGameOverMessage(String message) {
-        setCellsDisabled();
-
-        JOptionPane.showMessageDialog(frame, message, "You lost!", JOptionPane.ERROR_MESSAGE);
-    }
-
-    @Override
     public void revealAllMines(ArrayList<Point> minesPositions) {
         for (Point point : minesPositions) {
             JButton mineCell = cells[point.y][point.x];
-            mineCell.setIcon(mineIcon);
+            mineCell.setIcon(scaleIcon(mineIcon, mineCell.getWidth(), mineCell.getHeight()));
         }
     }
 
@@ -299,7 +544,12 @@ public class DesktopView implements View {
             for (int column = 0; column < boardColumnsAmount; ++column) {
                 cells[row][column] = new JButton("");
 
-                cells[row][column].setPreferredSize(new Dimension(20, 20));
+                if (boardColumnsAmount >= 14 || boardRowsAmount >= 14) {
+                    cells[row][column].setPreferredSize(new Dimension(16, 16));
+                } else {
+                    cells[row][column].setPreferredSize(new Dimension(50, 50));
+                }
+
                 cells[row][column].setActionCommand(row + "," + column);
                 cells[row][column].setIcon(null);
                 cells[row][column].setEnabled(true);
@@ -314,25 +564,37 @@ public class DesktopView implements View {
 
         frame.revalidate();
         frame.repaint();
+
+        stopTimer();
+        timerLabel.setText("0");
+        gameTime = 1;
     }
 
     @Override
     public void updateCell(int row, int column, String cellText) {
+        int cellWidth = cells[0][0].getWidth();
+        int cellHeight = cells[0][0].getHeight();
+
         switch (cellText) {
             case "E" -> {
                 cells[row][column].setBackground(Color.gray);
                 cells[row][column].setEnabled(false);
             }
 
-            case "1" -> cells[row][column].setIcon(oneIcon);
-            case "2" -> cells[row][column].setIcon(twoIcon);
-            case "3" -> cells[row][column].setIcon(threeIcon);
-            case "4" -> cells[row][column].setIcon(fourIcon);
-            case "5" -> cells[row][column].setIcon(fiveIcon);
-            case "6" -> cells[row][column].setIcon(sixIcon);
-            case "7" -> cells[row][column].setIcon(sevenIcon);
-            case "8" -> cells[row][column].setIcon(eightIcon);
+            case "1" -> cells[row][column].setIcon(scaleIcon(oneIcon, cellWidth, cellHeight));
+            case "2" -> cells[row][column].setIcon(scaleIcon(twoIcon, cellWidth, cellHeight));
+            case "3" -> cells[row][column].setIcon(scaleIcon(threeIcon, cellWidth, cellHeight));
+            case "4" -> cells[row][column].setIcon(scaleIcon(fourIcon, cellWidth, cellHeight));
+            case "5" -> cells[row][column].setIcon(scaleIcon(fiveIcon, cellWidth, cellHeight));
+            case "6" -> cells[row][column].setIcon(scaleIcon(sixIcon, cellWidth, cellHeight));
+            case "7" -> cells[row][column].setIcon(scaleIcon(sevenIcon, cellWidth, cellHeight));
+            case "8" -> cells[row][column].setIcon(scaleIcon(eightIcon, cellWidth, cellHeight));
         }
+    }
+
+    @Override
+    public ImageIcon scaleIcon(ImageIcon sourceIcon, int cellWidth, int cellHeight) {
+        return new ImageIcon(sourceIcon.getImage().getScaledInstance(cellWidth, cellHeight, Image.SCALE_SMOOTH));
     }
 
     @Override
@@ -366,20 +628,27 @@ public class DesktopView implements View {
 
     @Override
     public void showWinMessage(String message) {
+        timer.stop();
+
         String playerName = JOptionPane.showInputDialog(frame, "Please enter your name:", message, JOptionPane.INFORMATION_MESSAGE);
 
-        setCellsDisabled();
-
         if (playerName != null) {
-            presenter.writeScores(playerName);
+            presenter.writeScores(playerName, timerLabel.getText());
         }
     }
 
-    private void setCellsDisabled() {
-        for (int row = 0; row < rowsAmount; ++row) {
-            for (int column = 0; column < columnsAmount; ++column) {
-                cells[row][column].setEnabled((false));
-            }
-        }
+    @Override
+    public void showError(String exceptionMessage) {
+        JOptionPane.showMessageDialog(frame, exceptionMessage, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public void showHighlightedMine(int row, int column) {
+        cells[row][column].setIcon(scaleIcon(highlightedMineIcon, cells[row][column].getWidth(), cells[row][column].getHeight()));
+    }
+
+    @Override
+    public void stopTimer() {
+        timer.stop();
     }
 }
