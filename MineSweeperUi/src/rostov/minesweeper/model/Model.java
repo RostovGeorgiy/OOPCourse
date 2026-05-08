@@ -1,6 +1,6 @@
 package rostov.minesweeper.model;
 
-import rostov.minesweeper.presenter.ExceptionListener;
+import rostov.minesweeper.Difficulty;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public interface Model {
 
-    boolean toggleFlag(JButton cell, int remainingFlags);
+    boolean toggleFlag(int row, int column, int remainingFlags);
 
     boolean isRevealed(int row, int column);
 
@@ -38,13 +38,15 @@ public interface Model {
 
     boolean checkWin();
 
-    void writeScore(String playerName, String timeElapsed, String difficulty, ExceptionListener listener);
+    void writeScore(String playerName, String timeElapsed, Difficulty difficulty) throws Exception;
 
-    void readScores(String difficulty, ExceptionListener listener);
+    String readScores(Difficulty difficulty) throws Exception;
 
     int getMaxBoardDimension();
 
     void disableBoard();
 
     boolean isEnabled(int row, int column);
+
+    ImageIcon getIcon(int row, int column);
 }

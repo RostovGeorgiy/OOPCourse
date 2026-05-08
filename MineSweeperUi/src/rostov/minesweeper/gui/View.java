@@ -17,7 +17,7 @@ public interface View {
 
     void setPresenter(Presenter presenter);
 
-    void showToggledFlag(JButton cell);
+    void showToggledFlag(int row, int column);
 
     void revealAllMines(ArrayList<Point> minesPositions);
 
@@ -25,15 +25,13 @@ public interface View {
 
     void updateCell(int row, int column, String s);
 
-    ImageIcon scaleIcon(ImageIcon sourceIcon, int cellWidth, int cellHeight);
-
     void showAboutMessage();
 
     void showHighScoresTable(String scores);
 
     void exitGame();
 
-    void showWinMessage(String s);
+    void showWinMessage();
 
     void showError(String exceptionMessage);
 

@@ -1,11 +1,14 @@
 package rostov.minesweeper.model;
 
+import javax.swing.*;
+
 public class Cell {
     private boolean isRevealed;
     private boolean isMine;
     private boolean isFlagged;
     private boolean isEnabled;
     private int nearbyMinesAmount;
+    private ImageIcon icon;
 
     public boolean getRevealed() {
         return isRevealed;
@@ -45,5 +48,13 @@ public class Cell {
 
     public void setNearbyMinesAmount(int nearbyMinesAmount) {
         this.nearbyMinesAmount = nearbyMinesAmount;
+    }
+
+    public ImageIcon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(ImageIcon icon) {
+        this.icon = icon;
     }
 }

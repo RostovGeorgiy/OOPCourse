@@ -1,11 +1,14 @@
 package rostov.minesweeper.presenter;
 
+import rostov.minesweeper.Difficulty;
 import rostov.minesweeper.gui.View;
 import rostov.minesweeper.model.Model;
 
-import javax.swing.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Objects;
 
-public class Presenter implements ExceptionListener {
+public class Presenter {
     public final Model model;
     public final View view;
 
@@ -15,11 +18,11 @@ public class Presenter implements ExceptionListener {
 
     private boolean isFirstClick = true;
 
-    private String difficulty;
+    private Difficulty difficulty;
 
     public Presenter(Model model, View view) {
-        this.model = model;
-        this.view = view;
+        this.model = Objects.requireNonNull(model, "Model must not be null.");
+        this.view = Objects.requireNonNull(view, "View must not be null.");
 
         view.setPresenter(this);
     }
@@ -28,27 +31,19 @@ public class Presenter implements ExceptionListener {
         view.start();
     }
 
-    public void toggleFlag(JButton cell, int remainingFlags) {
-        String[] cellPosition = cell.getActionCommand().split(",");
-        int row = Integer.parseInt(cellPosition[0]);
-        int column = Integer.parseInt(cellPosition[1]);
-
+    public void toggleFlag(int row, int column, int remainingFlags) {
         if (!model.isEnabled(row, column)) {
             return;
         }
 
-        if (remainingFlags > 0 || cell.getIcon() != null) {
-            if (model.toggleFlag(cell, remainingFlags)) {
-                view.showToggledFlag(cell);
+        if (remainingFlags > 0 || model.getIcon(row, column) != null) {
+            if (model.toggleFlag(row, column, remainingFlags)) {
+                view.showToggledFlag(row, column);
             }
         }
     }
 
-    public void cellClicked(JButton cell) {
-        String[] cellPosition = cell.getActionCommand().split(",");
-        int row = Integer.parseInt(cellPosition[0]);
-        int column = Integer.parseInt(cellPosition[1]);
-
+    public void cellClicked(int row, int column) {
         if (model.isRevealed(row, column) || model.isFlagged(row, column) || !model.isEnabled(row, column)) {
             return;
         }
@@ -71,22 +66,18 @@ public class Presenter implements ExceptionListener {
             revealCell(row, column);
 
             if (model.checkWin()) {
-                view.showWinMessage("Victory!");
+                view.showWinMessage();
             }
         }
     }
 
-    public void cellMiddleClicked(JButton cell) {
-        String[] cellPosition = cell.getActionCommand().split(",");
-        int row = Integer.parseInt(cellPosition[0]);
-        int column = Integer.parseInt(cellPosition[1]);
-
+    public void cellMiddleClicked(int row, int column) {
         if (model.isFlagged(row, column) || !model.isEnabled(row, column)) {
             return;
         }
 
         if (!model.isRevealed(row, column)) {
-            cellClicked(cell);
+            cellClicked(row, column);
         }
 
         int nearbyMines = model.countNearbyMines(row, column);
@@ -119,7 +110,7 @@ public class Presenter implements ExceptionListener {
                         }
 
                         if (model.checkWin()) {
-                            view.showWinMessage("Victory!");
+                            view.showWinMessage();
                         }
 
                         int count = model.countNearbyMines(newRow, newColumn);
@@ -139,10 +130,9 @@ public class Presenter implements ExceptionListener {
 
         int count = model.countNearbyMines(row, column);
 
-        if (count > 0) {
-            view.updateCell(row, column, String.valueOf(count));
-        } else {
-            view.updateCell(row, column, "E");
+        view.updateCell(row, column, String.valueOf(count));
+
+        if (count == 0) {
             revealNearbyCells(row, column);
         }
     }
@@ -159,7 +149,7 @@ public class Presenter implements ExceptionListener {
 
                         int count = model.countNearbyMines(newRow, newColumn);
 
-                        String displayValue = (count > 0) ? String.valueOf(count) : "E";
+                        String displayValue = (count > 0) ? String.valueOf(count) : "0";
                         view.updateCell(newRow, newColumn, displayValue);
 
                         if (count == 0) {
@@ -183,7 +173,7 @@ public class Presenter implements ExceptionListener {
         return false;
     }
 
-    public void startGame(int rowsAmount, int columnsAmount, int minesAmount, String difficulty) {
+    public void startGame(int rowsAmount, int columnsAmount, int minesAmount, Difficulty difficulty) {
         this.rowsAmount = rowsAmount;
         this.columnsAmount = columnsAmount;
         this.minesAmount = minesAmount;
@@ -201,7 +191,15 @@ public class Presenter implements ExceptionListener {
     }
 
     public void highScores() {
-        model.readScores(difficulty, this);
+        try {
+            view.showHighScoresTable(model.readScores(difficulty));
+        } catch (FileNotFoundException e) {
+            view.showError("File not found: " + e.getMessage());
+        } catch (IOException e) {
+            view.showError("An IO exception has occurred: " + e.getMessage());
+        } catch (Exception e) {
+            view.showError("Error: " + e.getMessage());
+        }
     }
 
     public void exitGame() {
@@ -209,16 +207,14 @@ public class Presenter implements ExceptionListener {
     }
 
     public void writeScores(String playerName, String timeElapsed) {
-        model.writeScore(playerName, timeElapsed, difficulty, this);
-    }
-
-    @Override
-    public void onSuccess(String data) {
-        view.showHighScoresTable(data);
-    }
-
-    @Override
-    public void exceptionSent(String exceptionMessage) {
-        view.showError(exceptionMessage);
+        try {
+            model.writeScore(playerName, timeElapsed, difficulty);
+        } catch (FileNotFoundException e) {
+            view.showError("File not found: " + e.getMessage());
+        } catch (IOException e) {
+            view.showError("An IO exception has occurred: " + e.getMessage());
+        } catch (Exception e) {
+            view.showError("Error: " + e.getMessage());
+        }
     }
 }

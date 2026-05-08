@@ -1,6 +1,6 @@
 package rostov.minesweeper.model;
 
-import rostov.minesweeper.presenter.ExceptionListener;
+import rostov.minesweeper.Difficulty;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class MinesweeperModel implements Model {
-    private static final String beginnerScoresFilePath = "MineSweeperUi/src/rostov/minesweeper/beginnerHighscores.txt";
-    private static final String intermediateScoresFilePath = "MineSweeperUi/src/rostov/minesweeper/intermediateHighscores.txt";
-    private static final String expertScoresFilePath = "MineSweeperUi/src/rostov/minesweeper/expertHighscores.txt";
-
     private static final int maxBoardDimension = 30;
 
     private Cell[][] board;
@@ -51,11 +47,7 @@ public class MinesweeperModel implements Model {
     }
 
     @Override
-    public boolean toggleFlag(JButton flaggedCell, int remainingFlags) {
-        String[] cellPosition = flaggedCell.getActionCommand().split(",");
-        int row = Integer.parseInt(cellPosition[0]);
-        int column = Integer.parseInt(cellPosition[1]);
-
+    public boolean toggleFlag(int row, int column, int remainingFlags) {
         if (board[row][column].getRevealed()) {
             return false;
         }
@@ -201,24 +193,13 @@ public class MinesweeperModel implements Model {
     }
 
     @Override
-    public void writeScore(String playerName, String timeElapsed, String difficulty, ExceptionListener listener) {
-        switch (difficulty) {
-            case "beginner" ->
-                    Score.write(beginnerScoresFilePath, playerName, Integer.parseInt(timeElapsed), difficulty, listener);
-            case "intermediate" ->
-                    Score.write(intermediateScoresFilePath, playerName, Integer.parseInt(timeElapsed), difficulty, listener);
-            case "expert" ->
-                    Score.write(expertScoresFilePath, playerName, Integer.parseInt(timeElapsed), difficulty, listener);
-        }
+    public void writeScore(String playerName, String timeElapsed, Difficulty difficulty) throws Exception {
+        ScoreManager.write(difficulty.getScoresFilePath(), playerName, Integer.parseInt(timeElapsed));
     }
 
     @Override
-    public void readScores(String difficulty, ExceptionListener listener) {
-        switch (difficulty) {
-            case "beginner" -> Score.read(beginnerScoresFilePath, listener);
-            case "intermediate" -> Score.read(intermediateScoresFilePath, listener);
-            case "expert" -> Score.read(expertScoresFilePath, listener);
-        }
+    public String readScores(Difficulty difficulty) throws Exception {
+        return ScoreManager.read(difficulty.getScoresFilePath());
     }
 
     @Override
@@ -238,5 +219,10 @@ public class MinesweeperModel implements Model {
     @Override
     public boolean isEnabled(int row, int column) {
         return board[row][column].getEnabled();
+    }
+
+    @Override
+    public ImageIcon getIcon(int row, int column) {
+        return board[row][column].getIcon();
     }
 }

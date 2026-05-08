@@ -1,5 +1,6 @@
 package rostov.minesweeper.gui;
 
+import rostov.minesweeper.Difficulty;
 import rostov.minesweeper.presenter.Presenter;
 
 import javax.swing.*;
@@ -36,7 +37,8 @@ public class DesktopView implements View {
 
     private int remainingFlags;
 
-    private String difficulty = "beginner";
+    private String difficultyValue = "beginner";
+    private Difficulty difficulty;
 
     private Timer timer;
     private JLabel timerLabel;
@@ -182,19 +184,22 @@ public class DesktopView implements View {
                         timer.start();
                     }
 
-                    if (SwingUtilities.isLeftMouseButton(e)) {
-                        JButton cell = (JButton) e.getSource();
+                    JButton cell = (JButton) e.getSource();
 
+                    String[] cellPosition = cell.getActionCommand().split(",");
+                    int row = Integer.parseInt(cellPosition[0]);
+                    int column = Integer.parseInt(cellPosition[1]);
+
+                    if (SwingUtilities.isLeftMouseButton(e)) {
                         if (!cell.isEnabled()) {
                             return;
                         }
 
-                        presenter.cellClicked(cell);
+                        presenter.cellClicked(row, column);
                     }
 
                     if (SwingUtilities.isMiddleMouseButton(e)) {
-                        JButton cell = (JButton) e.getSource();
-                        presenter.cellMiddleClicked(cell);
+                        presenter.cellMiddleClicked(row, column);
                     }
                 }
             };
@@ -210,7 +215,12 @@ public class DesktopView implements View {
                         }
 
                         remainingFlags = Integer.parseInt(remainingFlagsLabel.getText());
-                        presenter.toggleFlag(flaggedCell, remainingFlags);
+
+                        String[] cellPosition = flaggedCell.getActionCommand().split(",");
+                        int row = Integer.parseInt(cellPosition[0]);
+                        int column = Integer.parseInt(cellPosition[1]);
+
+                        presenter.toggleFlag(row, column, remainingFlags);
                     }
                 }
             };
@@ -283,10 +293,11 @@ public class DesktopView implements View {
 
             startGameMenu.addActionListener(_ -> {
                 try {
-                    switch (difficulty) {
+                    switch (difficultyValue) {
                         case "beginner" -> {
                             difficultyLabel.setText("Difficulty: Beginner");
 
+                            difficulty = new Difficulty(9, 9, 10, "MineSweeperUi/src/rostov/minesweeper/beginnerHighscores.txt");
                             rowsAmount = 9;
                             columnsAmount = 9;
                             minesAmount = 10;
@@ -294,12 +305,16 @@ public class DesktopView implements View {
                         case "intermediate" -> {
                             difficultyLabel.setText("Difficulty: Intermediate");
 
+                            difficulty = new Difficulty(16, 16, 40, "MineSweeperUi/src/rostov/minesweeper/intermediateHighscores.txt");
+
                             rowsAmount = 16;
                             columnsAmount = 16;
                             minesAmount = 40;
                         }
                         case "expert" -> {
                             difficultyLabel.setText("Difficulty: Expert");
+
+                            difficulty = new Difficulty(30, 16, 99, "MineSweeperUi/src/rostov/minesweeper/expertHighscores.txt");
 
                             rowsAmount = 30;
                             columnsAmount = 16;
@@ -387,7 +402,7 @@ public class DesktopView implements View {
             group.add(customDifficultyButton);
 
             beginnerDifficultyButton.addActionListener(_ -> {
-                difficulty = "beginner";
+                difficultyValue = "beginner";
 
                 rowsTextField.setVisible(false);
                 rowsLabel.setVisible(false);
@@ -402,7 +417,7 @@ public class DesktopView implements View {
             });
 
             intermediateDifficultyButton.addActionListener(_ -> {
-                difficulty = "intermediate";
+                difficultyValue = "intermediate";
 
                 rowsTextField.setVisible(false);
                 rowsLabel.setVisible(false);
@@ -417,7 +432,7 @@ public class DesktopView implements View {
             });
 
             expertDifficultyButton.addActionListener(_ -> {
-                difficulty = "expert";
+                difficultyValue = "expert";
 
                 rowsTextField.setVisible(false);
                 rowsLabel.setVisible(false);
@@ -432,7 +447,7 @@ public class DesktopView implements View {
             });
 
             customDifficultyButton.addActionListener(_ -> {
-                difficulty = "custom";
+                difficultyValue = "custom";
 
                 rowsTextField.setVisible(true);
                 rowsLabel.setVisible(true);
@@ -508,7 +523,9 @@ public class DesktopView implements View {
     }
 
     @Override
-    public void showToggledFlag(JButton cell) {
+    public void showToggledFlag(int row, int column) {
+        JButton cell = cells[row][column];
+
         if (cell.getIcon() == null) {
             cell.setIcon(scaleIcon(flagIcon, cell.getWidth(), cell.getHeight()));
 
@@ -576,7 +593,7 @@ public class DesktopView implements View {
         int cellHeight = cells[0][0].getHeight();
 
         switch (cellText) {
-            case "E" -> {
+            case "0" -> {
                 cells[row][column].setBackground(Color.gray);
                 cells[row][column].setEnabled(false);
             }
@@ -592,7 +609,6 @@ public class DesktopView implements View {
         }
     }
 
-    @Override
     public ImageIcon scaleIcon(ImageIcon sourceIcon, int cellWidth, int cellHeight) {
         return new ImageIcon(sourceIcon.getImage().getScaledInstance(cellWidth, cellHeight, Image.SCALE_SMOOTH));
     }
@@ -627,10 +643,10 @@ public class DesktopView implements View {
     }
 
     @Override
-    public void showWinMessage(String message) {
+    public void showWinMessage() {
         timer.stop();
 
-        String playerName = JOptionPane.showInputDialog(frame, "Please enter your name:", message, JOptionPane.INFORMATION_MESSAGE);
+        String playerName = JOptionPane.showInputDialog(frame, "Please enter your name:", "Victory!", JOptionPane.INFORMATION_MESSAGE);
 
         if (playerName != null) {
             presenter.writeScores(playerName, timerLabel.getText());
