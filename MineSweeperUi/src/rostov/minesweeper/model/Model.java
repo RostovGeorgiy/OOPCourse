@@ -49,4 +49,6 @@ public interface Model {
     boolean isEnabled(int row, int column);
 
     ImageIcon getIcon(int row, int column);
+
+    Difficulty getDifficulty(String difficultyName);
 }

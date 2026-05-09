@@ -1,6 +1,5 @@
 package rostov.minesweeper.gui;
 
-import rostov.minesweeper.Difficulty;
 import rostov.minesweeper.presenter.Presenter;
 
 import javax.swing.*;
@@ -37,8 +36,7 @@ public class DesktopView implements View {
 
     private int remainingFlags;
 
-    private String difficultyValue = "beginner";
-    private Difficulty difficulty;
+    private String difficulty = "beginner";
 
     private Timer timer;
     private JLabel timerLabel;
@@ -54,13 +52,13 @@ public class DesktopView implements View {
     private boolean isStarted;
 
     public void start() {
+        Objects.requireNonNull(presenter, "Presenter must not be null.");
+
         if (isStarted) {
             throw new IllegalStateException("Start method was already called.");
         }
 
         isStarted = true;
-
-        Objects.requireNonNull(presenter, "Presenter must not be null.");
 
         SwingUtilities.invokeLater(() -> {
             minesweeperIcon = setIconPath("/rostov/minesweeper/resources/minesweeper.png");
@@ -263,7 +261,7 @@ public class DesktopView implements View {
 
                 minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
 
-                presenter.startGame(rowsAmount, columnsAmount, minesAmount, difficulty);
+                presenter.startCustomGame(rowsAmount, columnsAmount, minesAmount);
             });
 
 
@@ -293,11 +291,10 @@ public class DesktopView implements View {
 
             startGameMenu.addActionListener(_ -> {
                 try {
-                    switch (difficultyValue) {
+                    switch (difficulty) {
                         case "beginner" -> {
                             difficultyLabel.setText("Difficulty: Beginner");
 
-                            difficulty = new Difficulty(9, 9, 10, "MineSweeperUi/src/rostov/minesweeper/beginnerHighscores.txt");
                             rowsAmount = 9;
                             columnsAmount = 9;
                             minesAmount = 10;
@@ -305,16 +302,12 @@ public class DesktopView implements View {
                         case "intermediate" -> {
                             difficultyLabel.setText("Difficulty: Intermediate");
 
-                            difficulty = new Difficulty(16, 16, 40, "MineSweeperUi/src/rostov/minesweeper/intermediateHighscores.txt");
-
                             rowsAmount = 16;
                             columnsAmount = 16;
                             minesAmount = 40;
                         }
                         case "expert" -> {
                             difficultyLabel.setText("Difficulty: Expert");
-
-                            difficulty = new Difficulty(30, 16, 99, "MineSweeperUi/src/rostov/minesweeper/expertHighscores.txt");
 
                             rowsAmount = 30;
                             columnsAmount = 16;
@@ -355,7 +348,7 @@ public class DesktopView implements View {
 
                 minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
 
-                presenter.startGame(rowsAmount, columnsAmount, minesAmount, difficulty);
+                presenter.startGame(difficulty);
             });
 
             startGameMenu.doClick();
@@ -402,7 +395,7 @@ public class DesktopView implements View {
             group.add(customDifficultyButton);
 
             beginnerDifficultyButton.addActionListener(_ -> {
-                difficultyValue = "beginner";
+                difficulty = "beginner";
 
                 rowsTextField.setVisible(false);
                 rowsLabel.setVisible(false);
@@ -417,7 +410,7 @@ public class DesktopView implements View {
             });
 
             intermediateDifficultyButton.addActionListener(_ -> {
-                difficultyValue = "intermediate";
+                difficulty = "intermediate";
 
                 rowsTextField.setVisible(false);
                 rowsLabel.setVisible(false);
@@ -432,7 +425,7 @@ public class DesktopView implements View {
             });
 
             expertDifficultyButton.addActionListener(_ -> {
-                difficultyValue = "expert";
+                difficulty = "expert";
 
                 rowsTextField.setVisible(false);
                 rowsLabel.setVisible(false);
@@ -447,7 +440,7 @@ public class DesktopView implements View {
             });
 
             customDifficultyButton.addActionListener(_ -> {
-                difficultyValue = "custom";
+                difficulty = "custom";
 
                 rowsTextField.setVisible(true);
                 rowsLabel.setVisible(true);
@@ -529,84 +522,91 @@ public class DesktopView implements View {
         if (cell.getIcon() == null) {
             cell.setIcon(scaleIcon(flagIcon, cell.getWidth(), cell.getHeight()));
 
-            remainingFlagsLabel.setText(String.valueOf(remainingFlags - 1));
+            SwingUtilities.invokeLater(() -> remainingFlagsLabel.setText(String.valueOf(remainingFlags - 1)));
         } else {
             cell.setIcon(null);
 
-            remainingFlagsLabel.setText(String.valueOf(remainingFlags + 1));
+            SwingUtilities.invokeLater(() -> remainingFlagsLabel.setText(String.valueOf(remainingFlags + 1)));
         }
     }
 
     @Override
     public void revealAllMines(ArrayList<Point> minesPositions) {
         for (Point point : minesPositions) {
-            JButton mineCell = cells[point.y][point.x];
-            mineCell.setIcon(scaleIcon(mineIcon, mineCell.getWidth(), mineCell.getHeight()));
+            SwingUtilities.invokeLater(() -> {
+                JButton mineCell = cells[point.y][point.x];
+                mineCell.setIcon(scaleIcon(mineIcon, mineCell.getWidth(), mineCell.getHeight()));
+            });
         }
     }
 
     @Override
     public void resetBoard(int boardRowsAmount, int boardColumnsAmount) {
-        cells = new JButton[boardRowsAmount][boardColumnsAmount];
+        SwingUtilities.invokeLater(() -> {
+            cells = new JButton[boardRowsAmount][boardColumnsAmount];
 
-        frame.remove(minesweeperBoard);
+            frame.remove(minesweeperBoard);
 
-        minesweeperBoard = new JPanel();
-        minesweeperBoard.setLayout(new GridLayout(boardRowsAmount, boardColumnsAmount));
-        minesweeperBoard.setMaximumSize(new Dimension(550, 550));
+            minesweeperBoard = new JPanel();
+            minesweeperBoard.setLayout(new GridLayout(boardRowsAmount, boardColumnsAmount));
+            minesweeperBoard.setMaximumSize(new Dimension(550, 550));
 
-        frame.add(minesweeperBoard, gamePanelConstraints);
+            frame.add(minesweeperBoard, gamePanelConstraints);
 
-        for (int row = 0; row < boardRowsAmount; ++row) {
-            for (int column = 0; column < boardColumnsAmount; ++column) {
-                cells[row][column] = new JButton("");
+            for (int row = 0; row < boardRowsAmount; ++row) {
+                for (int column = 0; column < boardColumnsAmount; ++column) {
+                    cells[row][column] = new JButton("");
 
-                if (boardColumnsAmount >= 14 || boardRowsAmount >= 14) {
-                    cells[row][column].setPreferredSize(new Dimension(16, 16));
-                } else {
-                    cells[row][column].setPreferredSize(new Dimension(50, 50));
+                    if (boardColumnsAmount >= 14 || boardRowsAmount >= 14) {
+                        cells[row][column].setPreferredSize(new Dimension(16, 16));
+                    } else {
+                        cells[row][column].setPreferredSize(new Dimension(50, 50));
+                    }
+
+                    cells[row][column].setActionCommand(row + "," + column);
+                    cells[row][column].setIcon(null);
+                    cells[row][column].setEnabled(true);
+                    cells[row][column].setBackground(null);
+
+                    cells[row][column].addMouseListener(cellClickedListener);
+                    cells[row][column].addMouseListener(cellFlaggedListener);
+
+                    minesweeperBoard.add(cells[row][column]);
                 }
-
-                cells[row][column].setActionCommand(row + "," + column);
-                cells[row][column].setIcon(null);
-                cells[row][column].setEnabled(true);
-                cells[row][column].setBackground(null);
-
-                cells[row][column].addMouseListener(cellClickedListener);
-                cells[row][column].addMouseListener(cellFlaggedListener);
-
-                minesweeperBoard.add(cells[row][column]);
             }
-        }
 
-        frame.revalidate();
-        frame.repaint();
+            frame.revalidate();
+            frame.repaint();
 
-        stopTimer();
-        timerLabel.setText("0");
+            stopTimer();
+            timerLabel.setText("0");
+        });
+
         gameTime = 1;
     }
 
     @Override
     public void updateCell(int row, int column, String cellText) {
-        int cellWidth = cells[0][0].getWidth();
-        int cellHeight = cells[0][0].getHeight();
+        SwingUtilities.invokeLater(() -> {
+            int cellWidth = cells[0][0].getWidth();
+            int cellHeight = cells[0][0].getHeight();
 
-        switch (cellText) {
-            case "0" -> {
-                cells[row][column].setBackground(Color.gray);
-                cells[row][column].setEnabled(false);
+            switch (cellText) {
+                case "0" -> {
+                    cells[row][column].setBackground(Color.gray);
+                    cells[row][column].setEnabled(false);
+                }
+
+                case "1" -> cells[row][column].setIcon(scaleIcon(oneIcon, cellWidth, cellHeight));
+                case "2" -> cells[row][column].setIcon(scaleIcon(twoIcon, cellWidth, cellHeight));
+                case "3" -> cells[row][column].setIcon(scaleIcon(threeIcon, cellWidth, cellHeight));
+                case "4" -> cells[row][column].setIcon(scaleIcon(fourIcon, cellWidth, cellHeight));
+                case "5" -> cells[row][column].setIcon(scaleIcon(fiveIcon, cellWidth, cellHeight));
+                case "6" -> cells[row][column].setIcon(scaleIcon(sixIcon, cellWidth, cellHeight));
+                case "7" -> cells[row][column].setIcon(scaleIcon(sevenIcon, cellWidth, cellHeight));
+                case "8" -> cells[row][column].setIcon(scaleIcon(eightIcon, cellWidth, cellHeight));
             }
-
-            case "1" -> cells[row][column].setIcon(scaleIcon(oneIcon, cellWidth, cellHeight));
-            case "2" -> cells[row][column].setIcon(scaleIcon(twoIcon, cellWidth, cellHeight));
-            case "3" -> cells[row][column].setIcon(scaleIcon(threeIcon, cellWidth, cellHeight));
-            case "4" -> cells[row][column].setIcon(scaleIcon(fourIcon, cellWidth, cellHeight));
-            case "5" -> cells[row][column].setIcon(scaleIcon(fiveIcon, cellWidth, cellHeight));
-            case "6" -> cells[row][column].setIcon(scaleIcon(sixIcon, cellWidth, cellHeight));
-            case "7" -> cells[row][column].setIcon(scaleIcon(sevenIcon, cellWidth, cellHeight));
-            case "8" -> cells[row][column].setIcon(scaleIcon(eightIcon, cellWidth, cellHeight));
-        }
+        });
     }
 
     public ImageIcon scaleIcon(ImageIcon sourceIcon, int cellWidth, int cellHeight) {
@@ -615,52 +615,56 @@ public class DesktopView implements View {
 
     @Override
     public void showAboutMessage() {
-        JOptionPane.showMessageDialog(frame, """
+        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(frame, """
                  This is a classic minesweeper game.
                  Controls:
                      Select amount of rows and columns and amount of mines, then press 'Start Game' button.
                      Right click places/removes flag, left click reveals a cell.
                      To win, reveal all non-mined cells.
-                """, "Game info", JOptionPane.INFORMATION_MESSAGE);
+                """, "Game info", JOptionPane.INFORMATION_MESSAGE));
     }
 
     @Override
     public void showHighScoresTable(String scores) {
-        JTextArea textArea = new JTextArea(scores);
-        textArea.setRows(20);
-        textArea.setColumns(50);
-        textArea.setEditable(false);
-        textArea.setCaretPosition(0);
+        SwingUtilities.invokeLater(() -> {
+            JTextArea textArea = new JTextArea(scores);
+            textArea.setRows(20);
+            textArea.setColumns(50);
+            textArea.setEditable(false);
+            textArea.setCaretPosition(0);
 
-        JScrollPane scrollPane = new JScrollPane(textArea);
+            JScrollPane scrollPane = new JScrollPane(textArea);
 
-        JOptionPane.showMessageDialog(null, scrollPane, "Game Scores", JOptionPane.PLAIN_MESSAGE);
+            JOptionPane.showMessageDialog(null, scrollPane, "Game Scores", JOptionPane.PLAIN_MESSAGE);
+        });
     }
 
     @Override
     public void exitGame() {
-        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+        SwingUtilities.invokeLater(() -> frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)));
     }
 
     @Override
     public void showWinMessage() {
         timer.stop();
 
-        String playerName = JOptionPane.showInputDialog(frame, "Please enter your name:", "Victory!", JOptionPane.INFORMATION_MESSAGE);
+        SwingUtilities.invokeLater(() -> {
+            String playerName = JOptionPane.showInputDialog(frame, "Please enter your name:", "Victory!", JOptionPane.INFORMATION_MESSAGE);
 
-        if (playerName != null) {
-            presenter.writeScores(playerName, timerLabel.getText());
-        }
+            if (playerName != null) {
+                presenter.writeScores(playerName, timerLabel.getText());
+            }
+        });
     }
 
     @Override
     public void showError(String exceptionMessage) {
-        JOptionPane.showMessageDialog(frame, exceptionMessage, "Error", JOptionPane.ERROR_MESSAGE);
+        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(frame, exceptionMessage, "Error", JOptionPane.ERROR_MESSAGE));
     }
 
     @Override
     public void showHighlightedMine(int row, int column) {
-        cells[row][column].setIcon(scaleIcon(highlightedMineIcon, cells[row][column].getWidth(), cells[row][column].getHeight()));
+        SwingUtilities.invokeLater(() -> cells[row][column].setIcon(scaleIcon(highlightedMineIcon, cells[row][column].getWidth(), cells[row][column].getHeight())));
     }
 
     @Override

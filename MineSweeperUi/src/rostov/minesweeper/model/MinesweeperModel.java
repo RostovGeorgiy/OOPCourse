@@ -10,6 +10,15 @@ import java.util.Random;
 public class MinesweeperModel implements Model {
     private static final int maxBoardDimension = 30;
 
+    private final Difficulty beginnerDifficulty = new Difficulty("beginner", 9, 9, 10,
+            "MineSweeperUi/src/rostov/minesweeper/beginnerHighscores.txt");
+
+    private final Difficulty intermediateDifficulty = new Difficulty("intermediate", 16, 16, 40,
+            "MineSweeperUi/src/rostov/minesweeper/intermediateHighscores.txt");
+
+    private final Difficulty expertDifficulty = new Difficulty("expert", 30, 16, 99,
+            "MineSweeperUi/src/rostov/minesweeper/expertHighscores.txt");
+
     private Cell[][] board;
 
     private int rowsAmount = 9;
@@ -224,5 +233,16 @@ public class MinesweeperModel implements Model {
     @Override
     public ImageIcon getIcon(int row, int column) {
         return board[row][column].getIcon();
+    }
+
+    @Override
+    public Difficulty getDifficulty(String difficultyName) {
+        return switch (difficultyName) {
+            case "beginner" -> beginnerDifficulty;
+            case "intermediate" -> intermediateDifficulty;
+            case "expert" -> expertDifficulty;
+            default -> null;
+        };
+
     }
 }

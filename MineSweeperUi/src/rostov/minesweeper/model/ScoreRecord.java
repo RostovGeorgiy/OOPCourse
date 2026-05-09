@@ -19,7 +19,7 @@ public class ScoreRecord {
 
     @Override
     public String toString() {
-        return "Name: " + playerName + ", Score: " + playerScore;
+        return playerName + ":" + playerScore;
     }
 
     @Override

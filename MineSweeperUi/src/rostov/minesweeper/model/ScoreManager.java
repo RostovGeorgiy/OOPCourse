@@ -10,17 +10,19 @@ public class ScoreManager {
 
     public static String read(String scoresFilePath) throws Exception {
         StringBuilder stringBuilder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(scoresFilePath));
-        String line;
 
-        while ((line = reader.readLine()) != null) {
-            String[] recordParts = line.split(":");
+        try (BufferedReader reader = new BufferedReader(new FileReader(scoresFilePath))) {
+            String line;
 
-            String name = recordParts[0].trim();
-            int score = Integer.parseInt(recordParts[1].trim());
+            while ((line = reader.readLine()) != null) {
+                String[] recordParts = line.split(":");
 
-            ScoreRecord scoreRecord = new ScoreRecord(name, score);
-            stringBuilder.append(scoreRecord).append(System.lineSeparator());
+                String name = recordParts[0].trim();
+                int score = Integer.parseInt(recordParts[1].trim());
+
+                ScoreRecord scoreRecord = new ScoreRecord(name, score);
+                stringBuilder.append(scoreRecord).append(System.lineSeparator());
+            }
         }
 
         return stringBuilder.toString();
@@ -33,50 +35,47 @@ public class ScoreManager {
             playerName = "Guest";
         }
 
-        PrintWriter writer = new PrintWriter(new FileWriter(file, true));
-
-        writer.println();
-        writer.print(playerName + ":");
-        writer.print(gameScore > 0 ? gameScore : 1);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {
+            writer.println();
+            writer.print(playerName + ":");
+            writer.print(gameScore > 0 ? gameScore : 1);
+        }
 
         topScores(scoresFilePath);
     }
 
     private static void topScores(String scoresFilePath) throws Exception {
-        List<ScoreRecord> topScores;
+        try (BufferedReader reader = new BufferedReader(new FileReader(scoresFilePath));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(scoresFilePath))) {
 
-        BufferedReader reader = new BufferedReader(new FileReader(scoresFilePath));
+            ArrayList<ScoreRecord> scores = new ArrayList<>();
+            String line;
 
-        ArrayList<ScoreRecord> scores = new ArrayList<>();
-        String line;
+            while ((line = reader.readLine()) != null) {
+                String[] recordParts = line.split(":");
 
-        while ((line = reader.readLine()) != null) {
-            String[] recordParts = line.split(":");
+                String name = recordParts[0].trim();
+                int score = Integer.parseInt(recordParts[1].trim());
 
-            String name = recordParts[0].trim();
-            int score = Integer.parseInt(recordParts[1].trim());
+                scores.add(new ScoreRecord(name, score));
+            }
 
-            scores.add(new ScoreRecord(name, score));
-        }
+            scores.sort(Comparator.comparingInt(ScoreRecord::getPlayerScore));
 
-        scores.sort(Comparator.comparingInt(ScoreRecord::getPlayerScore));
+            List<ScoreRecord> topScores = scores.stream()
+                    .limit(TOP_SCORES_AMOUNT)
+                    .toList();
 
-        topScores = scores.stream()
-                .limit(TOP_SCORES_AMOUNT)
-                .toList();
+            int scoresAmount = 0;
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(scoresFilePath));
+            for (ScoreRecord record : topScores) {
+                scoresAmount++;
 
-        int scoresAmount = 0;
+                writer.write(record.toString());
 
-        for (ScoreRecord record : topScores) {
-            scoresAmount++;
-
-            StringBuilder stringBuilder = new StringBuilder();
-            writer.write(stringBuilder.append(record.getPlayerName()).append(":").append(record.getPlayerScore()).toString());
-
-            if (scoresAmount < TOP_SCORES_AMOUNT) {
-                writer.newLine();
+                if (scoresAmount < TOP_SCORES_AMOUNT) {
+                    writer.newLine();
+                }
             }
         }
     }

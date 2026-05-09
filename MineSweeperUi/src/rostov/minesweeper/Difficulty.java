@@ -3,12 +3,13 @@ package rostov.minesweeper;
 import java.util.Objects;
 
 public class Difficulty {
+    private String name;
     private int rowsAmount;
     private int columnsAmount;
     private int minesAmount;
     private String scoresFilePath;
 
-    public Difficulty(int rowsAmount, int columnsAmount, int minesAmount, String scoresFilePath) {
+    public Difficulty(String name, int rowsAmount, int columnsAmount, int minesAmount, String scoresFilePath) {
         if (rowsAmount < 0 || columnsAmount < 0 || minesAmount < 0) {
             throw new IllegalArgumentException("Rows, columns and mines amounts must be > 0.");
         }
@@ -17,10 +18,19 @@ public class Difficulty {
             throw new IllegalArgumentException("Mines amount too high.");
         }
 
+        this.name = name;
         this.rowsAmount = rowsAmount;
         this.columnsAmount = columnsAmount;
         this.minesAmount = minesAmount;
         this.scoresFilePath = Objects.requireNonNull(scoresFilePath, "Scores file path must not be null");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getRowsAmount() {

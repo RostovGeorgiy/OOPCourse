@@ -173,11 +173,24 @@ public class Presenter {
         return false;
     }
 
-    public void startGame(int rowsAmount, int columnsAmount, int minesAmount, Difficulty difficulty) {
+    public void startGame(String difficultyName) {
+        Objects.requireNonNull(difficulty = model.getDifficulty(difficultyName), "Error in difficulty name");
+
+        this.rowsAmount = difficulty.getRowsAmount();
+        this.columnsAmount = difficulty.getColumnsAmount();
+        this.minesAmount = difficulty.getMinesAmount();
+
+        model.resetBoard(rowsAmount, columnsAmount);
+
+        isFirstClick = true;
+
+        view.resetBoard(model.getRowsAmount(), model.getColumnsAmount());
+    }
+
+    public void startCustomGame(int rowsAmount, int columnsAmount, int minesAmount) {
         this.rowsAmount = rowsAmount;
         this.columnsAmount = columnsAmount;
         this.minesAmount = minesAmount;
-        this.difficulty = difficulty;
 
         model.resetBoard(rowsAmount, columnsAmount);
 
