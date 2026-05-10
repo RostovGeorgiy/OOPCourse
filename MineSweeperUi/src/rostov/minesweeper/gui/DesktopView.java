@@ -76,11 +76,11 @@ public class DesktopView implements View {
 
             frame = new JFrame("Minesweeper");
             frame.setIconImage(minesweeperIcon.getImage());
-            frame.setSize(1000, 1200);
+            frame.setSize(750, 950);
             frame.setLocationRelativeTo(null);
             frame.setLayout(new GridBagLayout());
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            frame.setMinimumSize(new Dimension(800, 1000));
+            frame.setMinimumSize(new Dimension(600, 900));
 
             JLabel rowsLabel = new JLabel("Input amount of rows:");
             rowsLabel.setVisible(false);
@@ -133,18 +133,40 @@ public class DesktopView implements View {
                 }
             });
 
-            JPanel optionsPanel = new JPanel();
-
             JLabel flagsCountInfoLabel = new JLabel("Flags remaining: ");
 
             remainingFlagsLabel.setPreferredSize(new Dimension(50, 50));
 
-            optionsPanel.add(rowsLabel);
-            optionsPanel.add(rowsTextField);
-            optionsPanel.add(columnsLabel);
-            optionsPanel.add(columnsTextField);
-            optionsPanel.add(minesLabel);
-            optionsPanel.add(minesTextField);
+            GridBagConstraints rowLabelConstraints = new GridBagConstraints();
+            rowLabelConstraints.weightx = 1.0;
+
+            GridBagConstraints rowTextFieldConstraints = new GridBagConstraints();
+            rowTextFieldConstraints.weightx = 1.0;
+
+            GridBagConstraints columnLabelConstraints = new GridBagConstraints();
+            columnLabelConstraints.weightx = 1.0;
+
+            GridBagConstraints columnTextFieldConstraints = new GridBagConstraints();
+            columnTextFieldConstraints.weightx = 1.0;
+
+            GridBagConstraints minesLabelConstraints = new GridBagConstraints();
+            minesLabelConstraints.weightx = 1.0;
+
+            GridBagConstraints minesTextFieldConstraints = new GridBagConstraints();
+            minesTextFieldConstraints.weightx = 1.0;
+            minesTextFieldConstraints.gridwidth = GridBagConstraints.REMAINDER;
+
+            JPanel optionsPanel = new JPanel(new GridBagLayout());
+
+            optionsPanel.add(rowsLabel, rowLabelConstraints);
+            optionsPanel.add(rowsTextField, rowTextFieldConstraints);
+            optionsPanel.add(columnsLabel, columnLabelConstraints);
+            optionsPanel.add(columnsTextField, columnTextFieldConstraints);
+            optionsPanel.add(minesLabel, minesLabelConstraints);
+            optionsPanel.add(minesTextField, minesTextFieldConstraints);
+
+            optionsPanel.add(flagsCountInfoLabel);
+            optionsPanel.add(remainingFlagsLabel);
 
             GridBagConstraints optionsPanelConstraints = new GridBagConstraints();
 
@@ -153,27 +175,22 @@ public class DesktopView implements View {
             optionsPanelConstraints.weightx = 0.0;
             optionsPanelConstraints.weighty = 0.0;
             optionsPanelConstraints.gridwidth = GridBagConstraints.REMAINDER;
-            optionsPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
+            optionsPanelConstraints.fill = GridBagConstraints.NONE;
             optionsPanelConstraints.anchor = GridBagConstraints.NORTH;
 
             frame.add(optionsPanel, optionsPanelConstraints);
 
-            GridBagConstraints flagsPanelConstraints = new GridBagConstraints();
+            JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
 
-            JPanel flagsPanel = new JPanel();
+            GridBagConstraints separatorConstraints = new GridBagConstraints();
+            separatorConstraints.gridx = 0;
+            separatorConstraints.gridy = 1;
+            separatorConstraints.gridwidth = GridBagConstraints.REMAINDER;
+            separatorConstraints.fill = GridBagConstraints.HORIZONTAL;
+            separatorConstraints.weightx = 1.0;
+            separatorConstraints.insets = new Insets(10, 0, 10, 0);
 
-            flagsPanel.add(flagsCountInfoLabel);
-            flagsPanel.add(remainingFlagsLabel);
-
-            flagsPanelConstraints.gridx = 0;
-            flagsPanelConstraints.gridy = 1;
-            flagsPanelConstraints.weightx = 0.0;
-            flagsPanelConstraints.weighty = 0.0;
-            flagsPanelConstraints.gridwidth = GridBagConstraints.REMAINDER;
-            flagsPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
-            flagsPanelConstraints.anchor = GridBagConstraints.NORTH;
-
-            frame.add(flagsPanel, flagsPanelConstraints);
+            frame.add(separator, separatorConstraints);
 
             cellClickedListener = new MouseAdapter() {
                 @Override
@@ -227,98 +244,25 @@ public class DesktopView implements View {
             difficultyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
             optionsPanel.add(difficultyLabel);
 
-            JButton startCustomGameButton = new JButton("OK");
-            startCustomGameButton.setVisible(false);
-            optionsPanel.add(startCustomGameButton);
+            JButton startGameButton = new JButton("Start Game");
+            optionsPanel.add(startGameButton);
 
-            startCustomGameButton.addActionListener(_ -> {
-                difficultyLabel.setText("Difficulty: Custom");
-
-                rowsAmount = Integer.parseInt(rowsTextField.getText());
-                columnsAmount = Integer.parseInt(columnsTextField.getText());
-                minesAmount = Integer.parseInt(minesTextField.getText());
-
-                if (minesAmount >= rowsAmount * columnsAmount) {
-                    showInputErrorMessage();
-
-                    rowsTextField.setText("9");
-                    columnsTextField.setText("9");
-                    minesTextField.setText("10");
-
-                    rowsAmount = 9;
-                    columnsAmount = 9;
-                    minesAmount = 10;
-                }
-
-                if (presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) {
-                    rowsAmount = 9;
-                    columnsAmount = 9;
-                    minesAmount = 10;
-                }
-
-                remainingFlags = minesAmount;
-                remainingFlagsLabel.setText("" + remainingFlags);
-
-                minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
-
-                presenter.startCustomGame(rowsAmount, columnsAmount, minesAmount);
-            });
-
-
-            timerLabel = new JLabel("0");
-            timerLabel.setPreferredSize(new Dimension(100, 40));
-            timerLabel.setForeground(Color.RED);
-
-            timerLabel.setFont(new Font("Serif", Font.BOLD, 24));
-            optionsPanel.add(timerLabel);
-
-            ActionListener updateTimer = _ -> {
-                timerLabel.setText(String.valueOf(gameTime));
-                gameTime += 1;
-            };
-
-            timer = new Timer(1000, updateTimer);
-
-            JMenuBar gameMenuBar = new JMenuBar();
-
-            JMenu gameMenu = new JMenu("Menu");
-
-            gameMenuBar.add(gameMenu);
-
-            JMenuItem startGameMenu = new JMenuItem("StartGame");
-            startGameMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
-                    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
-
-            startGameMenu.addActionListener(_ -> {
+            ActionListener startGameListener = _ -> {
                 try {
                     switch (difficulty) {
-                        case "beginner" -> {
-                            difficultyLabel.setText("Difficulty: Beginner");
-
-                            rowsAmount = 9;
-                            columnsAmount = 9;
-                            minesAmount = 10;
-                        }
-                        case "intermediate" -> {
-                            difficultyLabel.setText("Difficulty: Intermediate");
-
-                            rowsAmount = 16;
-                            columnsAmount = 16;
-                            minesAmount = 40;
-                        }
-                        case "expert" -> {
-                            difficultyLabel.setText("Difficulty: Expert");
-
-                            rowsAmount = 30;
-                            columnsAmount = 16;
-                            minesAmount = 99;
-                        }
+                        case "beginner" -> difficultyLabel.setText("Difficulty: Beginner");
+                        case "intermediate" -> difficultyLabel.setText("Difficulty: Intermediate");
+                        case "expert" -> difficultyLabel.setText("Difficulty: Expert");
                         case "custom" -> {
                             difficultyLabel.setText("Difficulty: Custom");
 
                             rowsAmount = Integer.parseInt(rowsTextField.getText());
                             columnsAmount = Integer.parseInt(columnsTextField.getText());
                             minesAmount = Integer.parseInt(minesTextField.getText());
+
+                            presenter.startCustomGame(rowsAmount, columnsAmount, minesAmount);
+
+                            return;
                         }
                     }
                 } catch (Exception e) {
@@ -349,7 +293,39 @@ public class DesktopView implements View {
                 minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
 
                 presenter.startGame(difficulty);
-            });
+            };
+
+            startGameButton.addActionListener(startGameListener);
+
+            timerLabel = new JLabel("0");
+            timerLabel.setPreferredSize(new Dimension(100, 40));
+            timerLabel.setForeground(Color.RED);
+
+            timerLabel.setFont(new Font("Serif", Font.BOLD, 24));
+
+            GridBagConstraints timerLableConstraints = new GridBagConstraints();
+            timerLableConstraints.insets = new Insets(0, 80, 0, 0);
+
+            optionsPanel.add(timerLabel, timerLableConstraints);
+
+            ActionListener updateTimer = _ -> {
+                timerLabel.setText(String.valueOf(gameTime));
+                gameTime += 1;
+            };
+
+            timer = new Timer(1000, updateTimer);
+
+            JMenuBar gameMenuBar = new JMenuBar();
+
+            JMenu gameMenu = new JMenu("Menu");
+
+            gameMenuBar.add(gameMenu);
+
+            JMenuItem startGameMenu = new JMenuItem("Start Game");
+            startGameMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
+                    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+
+            startGameMenu.addActionListener(startGameListener);
 
             startGameMenu.doClick();
 
@@ -405,8 +381,6 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(false);
                 minesLabel.setVisible(false);
-
-                startCustomGameButton.setVisible(false);
             });
 
             intermediateDifficultyButton.addActionListener(_ -> {
@@ -420,8 +394,6 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(false);
                 minesLabel.setVisible(false);
-
-                startCustomGameButton.setVisible(false);
             });
 
             expertDifficultyButton.addActionListener(_ -> {
@@ -435,8 +407,6 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(false);
                 minesLabel.setVisible(false);
-
-                startCustomGameButton.setVisible(false);
             });
 
             customDifficultyButton.addActionListener(_ -> {
@@ -450,8 +420,6 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(true);
                 minesLabel.setVisible(true);
-
-                startCustomGameButton.setVisible(true);
             });
 
             optionsMenu.add(beginnerDifficultyButton);
@@ -474,7 +442,7 @@ public class DesktopView implements View {
             gamePanelConstraints.weighty = 1.0;
             gamePanelConstraints.fill = GridBagConstraints.NONE;
             gamePanelConstraints.anchor = GridBagConstraints.CENTER;
-            gamePanelConstraints.gridwidth = GridBagConstraints.REMAINDER;
+            gamePanelConstraints.gridwidth = GridBagConstraints.NONE;
 
             frame.add(minesweeperBoard, gamePanelConstraints);
 
@@ -502,7 +470,7 @@ public class DesktopView implements View {
 
     @Override
     public void showInputErrorMessage() {
-        JOptionPane.showMessageDialog(frame, "Mines amount should not be >= total cells amount. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Incorrect input values: too few/too many mines or 0/negative values. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
@@ -557,8 +525,10 @@ public class DesktopView implements View {
                 for (int column = 0; column < boardColumnsAmount; ++column) {
                     cells[row][column] = new JButton("");
 
-                    if (boardColumnsAmount >= 14 || boardRowsAmount >= 14) {
+                    if (boardRowsAmount > 20 || boardColumnsAmount > 20) {
                         cells[row][column].setPreferredSize(new Dimension(16, 16));
+                    } else if ((boardColumnsAmount >= 14) || (boardRowsAmount >= 14)) {
+                        cells[row][column].setPreferredSize(new Dimension(30, 30));
                     } else {
                         cells[row][column].setPreferredSize(new Dimension(50, 50));
                     }

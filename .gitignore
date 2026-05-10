@@ -22,3 +22,19 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+/out/production/MineSweeperUi/rostov/minesweeper/resources/1.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/2.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/3.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/4.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/5.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/6.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/7.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/8.png
+/out/production/MineSweeperUi/rostov/minesweeper/beginnerHighscores.txt
+/out/production/MineSweeperUi/rostov/minesweeper/expertHighScores
+/out/production/MineSweeperUi/rostov/minesweeper/resources/flag.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/highlightedMine.png
+/highscores.txt
+/out/production/MineSweeperUi/rostov/minesweeper/intermediateHighscores.txt
+/out/production/MineSweeperUi/rostov/minesweeper/resources/mine.png
+/out/production/MineSweeperUi/rostov/minesweeper/resources/minesweeper.png

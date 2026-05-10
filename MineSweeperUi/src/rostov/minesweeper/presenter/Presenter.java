@@ -89,8 +89,8 @@ public class Presenter {
     }
 
     private void revealOnlyNearbyCells(int row, int column) {
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; ++i) {
+            for (int j = -1; j <= 1; ++j) {
                 int newRow = row + i;
                 int newColumn = column + j;
 
@@ -115,7 +115,7 @@ public class Presenter {
 
                         int count = model.countNearbyMines(newRow, newColumn);
 
-                        String displayValue = (count > 0) ? String.valueOf(count) : "E";
+                        String displayValue = (count > 0) ? String.valueOf(count) : "0";
                         view.updateCell(newRow, newColumn, displayValue);
                     }
                 }
@@ -174,7 +174,7 @@ public class Presenter {
     }
 
     public void startGame(String difficultyName) {
-        Objects.requireNonNull(difficulty = model.getDifficulty(difficultyName), "Error in difficulty name");
+        difficulty = model.getDifficulty(difficultyName);
 
         this.rowsAmount = difficulty.getRowsAmount();
         this.columnsAmount = difficulty.getColumnsAmount();
