@@ -1,6 +1,6 @@
 package rostov.minesweeper.presenter;
 
-import rostov.minesweeper.Difficulty;
+import rostov.minesweeper.model.Difficulty;
 import rostov.minesweeper.gui.View;
 import rostov.minesweeper.model.Model;
 
@@ -28,6 +28,7 @@ public class Presenter {
     }
 
     public void start() {
+        model.addDifficulties();
         view.start();
     }
 
@@ -36,7 +37,7 @@ public class Presenter {
             return;
         }
 
-        if (remainingFlags > 0 || model.getIcon(row, column) != null) {
+        if (remainingFlags > 0 || view.isIconNonNull(row, column)) {
             if (model.toggleFlag(row, column, remainingFlags)) {
                 view.showToggledFlag(row, column);
             }
@@ -84,42 +85,7 @@ public class Presenter {
         int nearbyFlags = model.countNearbyFlags(row, column);
 
         if (nearbyFlags == nearbyMines) {
-            revealOnlyNearbyCells(row, column);
-        }
-    }
-
-    private void revealOnlyNearbyCells(int row, int column) {
-        for (int i = -1; i <= 1; ++i) {
-            for (int j = -1; j <= 1; ++j) {
-                int newRow = row + i;
-                int newColumn = column + j;
-
-                if (newRow >= 0 && newRow < rowsAmount && newColumn >= 0 && newColumn < columnsAmount) {
-                    if (!model.isRevealed(newRow, newColumn) && !model.isFlagged(newRow, newColumn)) {
-                        model.setRevealed(newRow, newColumn);
-
-                        if (!model.isFlagged(newRow, newColumn) && model.isMine(newRow, newColumn)) {
-                            model.disableBoard();
-
-                            view.revealAllMines(model.getMines());
-                            view.showHighlightedMine(newRow, newColumn);
-
-                            view.stopTimer();
-
-                            return;
-                        }
-
-                        if (model.checkWin()) {
-                            view.showWinMessage();
-                        }
-
-                        int count = model.countNearbyMines(newRow, newColumn);
-
-                        String displayValue = (count > 0) ? String.valueOf(count) : "0";
-                        view.updateCell(newRow, newColumn, displayValue);
-                    }
-                }
-            }
+            revealNearbyCells(row, column);
         }
     }
 
@@ -162,9 +128,10 @@ public class Presenter {
     }
 
     public boolean isIncorrectBoardSize(int rowsAmount, int columnsAmount) {
-        int maxBoardDimension = model.getMaxBoardDimension();
+        int maxRowsAmount = model.getMaxRowsAmount();
+        int maxColumnsAmount = model.getMaxColumnsAmount();
 
-        if (rowsAmount > maxBoardDimension || columnsAmount > maxBoardDimension) {
+        if (rowsAmount > maxRowsAmount || columnsAmount > maxColumnsAmount) {
             view.showBoardSizeErrorMessage();
 
             return true;

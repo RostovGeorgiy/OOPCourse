@@ -36,7 +36,10 @@ public class ScoreManager {
         }
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {
-            writer.println();
+            if (file.length() != 0) {
+                writer.println();
+            }
+
             writer.print(playerName + ":");
             writer.print(gameScore > 0 ? gameScore : 1);
         }
@@ -45,9 +48,7 @@ public class ScoreManager {
     }
 
     private static void topScores(String scoresFilePath) throws Exception {
-        try (BufferedReader reader = new BufferedReader(new FileReader(scoresFilePath));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(scoresFilePath))) {
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(scoresFilePath))) {
             ArrayList<ScoreRecord> scores = new ArrayList<>();
             String line;
 
@@ -58,6 +59,12 @@ public class ScoreManager {
                 int score = Integer.parseInt(recordParts[1].trim());
 
                 scores.add(new ScoreRecord(name, score));
+
+                System.out.println(scores);
+            }
+
+            if (scores.isEmpty()) {
+                return;
             }
 
             scores.sort(Comparator.comparingInt(ScoreRecord::getPlayerScore));
@@ -68,13 +75,15 @@ public class ScoreManager {
 
             int scoresAmount = 0;
 
-            for (ScoreRecord record : topScores) {
-                scoresAmount++;
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(scoresFilePath))) {
+                for (ScoreRecord record : topScores) {
+                    scoresAmount++;
 
-                writer.write(record.toString());
+                    writer.write(record.toString());
 
-                if (scoresAmount < TOP_SCORES_AMOUNT) {
-                    writer.newLine();
+                    if (scoresAmount < TOP_SCORES_AMOUNT) {
+                        writer.newLine();
+                    }
                 }
             }
         }

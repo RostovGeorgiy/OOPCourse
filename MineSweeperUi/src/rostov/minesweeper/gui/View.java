@@ -38,4 +38,6 @@ public interface View {
     void showHighlightedMine(int row, int column);
 
     void stopTimer();
+
+    boolean isIconNonNull(int row, int column);
 }

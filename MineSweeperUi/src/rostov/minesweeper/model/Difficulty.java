@@ -1,4 +1,4 @@
-package rostov.minesweeper;
+package rostov.minesweeper.model;
 
 import java.util.Objects;
 
@@ -10,12 +10,16 @@ public class Difficulty {
     private String scoresFilePath;
 
     public Difficulty(String name, int rowsAmount, int columnsAmount, int minesAmount, String scoresFilePath) {
-        if (rowsAmount < 0 || columnsAmount < 0 || minesAmount < 0) {
+        if (rowsAmount <= 0 || columnsAmount <= 0 || minesAmount <= 0) {
             throw new IllegalArgumentException("Rows, columns and mines amounts must be > 0.");
         }
 
         if (minesAmount >= rowsAmount * columnsAmount) {
             throw new IllegalArgumentException("Mines amount too high.");
+        }
+
+        if (name == null) {
+            throw new IllegalArgumentException("Difficulty name must not be null.");
         }
 
         this.name = name;

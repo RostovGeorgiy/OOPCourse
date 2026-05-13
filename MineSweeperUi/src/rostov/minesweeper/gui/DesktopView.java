@@ -3,6 +3,7 @@ package rostov.minesweeper.gui;
 import rostov.minesweeper.presenter.Presenter;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -76,7 +77,7 @@ public class DesktopView implements View {
 
             frame = new JFrame("Minesweeper");
             frame.setIconImage(minesweeperIcon.getImage());
-            frame.setSize(750, 950);
+            frame.setSize(1000, 950);
             frame.setLocationRelativeTo(null);
             frame.setLayout(new GridBagLayout());
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -157,6 +158,7 @@ public class DesktopView implements View {
             minesTextFieldConstraints.gridwidth = GridBagConstraints.REMAINDER;
 
             JPanel optionsPanel = new JPanel(new GridBagLayout());
+            optionsPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
 
             optionsPanel.add(rowsLabel, rowLabelConstraints);
             optionsPanel.add(rowsTextField, rowTextFieldConstraints);
@@ -241,6 +243,10 @@ public class DesktopView implements View {
             };
 
             JLabel difficultyLabel = new JLabel("Difficulty: Beginner");
+            Dimension difficlutyLabelDimension = new Dimension(150, 10);
+            difficultyLabel.setPreferredSize(difficlutyLabelDimension);
+            difficultyLabel.setMinimumSize(difficlutyLabelDimension);
+
             difficultyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
             optionsPanel.add(difficultyLabel);
 
@@ -259,17 +265,13 @@ public class DesktopView implements View {
                             rowsAmount = Integer.parseInt(rowsTextField.getText());
                             columnsAmount = Integer.parseInt(columnsTextField.getText());
                             minesAmount = Integer.parseInt(minesTextField.getText());
-
-                            presenter.startCustomGame(rowsAmount, columnsAmount, minesAmount);
-
-                            return;
                         }
                     }
                 } catch (Exception e) {
                     return;
                 }
 
-                if (minesAmount >= rowsAmount * columnsAmount) {
+                if ((presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) || (minesAmount >= rowsAmount * columnsAmount || minesAmount < 1)) {
                     showInputErrorMessage();
 
                     rowsTextField.setText("9");
@@ -281,16 +283,16 @@ public class DesktopView implements View {
                     minesAmount = 10;
                 }
 
-                if (presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) {
-                    rowsAmount = 9;
-                    columnsAmount = 9;
-                    minesAmount = 10;
-                }
-
                 remainingFlags = minesAmount;
                 remainingFlagsLabel.setText("" + remainingFlags);
 
                 minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
+
+                if (difficulty.equals("custom")) {
+                    presenter.startCustomGame(rowsAmount, columnsAmount, minesAmount);
+
+                    return;
+                }
 
                 presenter.startGame(difficulty);
             };
@@ -303,10 +305,10 @@ public class DesktopView implements View {
 
             timerLabel.setFont(new Font("Serif", Font.BOLD, 24));
 
-            GridBagConstraints timerLableConstraints = new GridBagConstraints();
-            timerLableConstraints.insets = new Insets(0, 80, 0, 0);
+            GridBagConstraints timerLabelConstraints = new GridBagConstraints();
+            timerLabelConstraints.insets = new Insets(0, 80, 0, 0);
 
-            optionsPanel.add(timerLabel, timerLableConstraints);
+            optionsPanel.add(timerLabel, timerLabelConstraints);
 
             ActionListener updateTimer = _ -> {
                 timerLabel.setText(String.valueOf(gameTime));
@@ -475,7 +477,7 @@ public class DesktopView implements View {
 
     @Override
     public void showBoardSizeErrorMessage() {
-        JOptionPane.showMessageDialog(frame, "Board should have up to 30 rows and columns. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Board should have up to 18 rows and 30 columns. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
@@ -525,9 +527,7 @@ public class DesktopView implements View {
                 for (int column = 0; column < boardColumnsAmount; ++column) {
                     cells[row][column] = new JButton("");
 
-                    if (boardRowsAmount > 20 || boardColumnsAmount > 20) {
-                        cells[row][column].setPreferredSize(new Dimension(16, 16));
-                    } else if ((boardColumnsAmount >= 14) || (boardRowsAmount >= 14)) {
+                   if ((boardColumnsAmount >= 14) || (boardRowsAmount >= 14)) {
                         cells[row][column].setPreferredSize(new Dimension(30, 30));
                     } else {
                         cells[row][column].setPreferredSize(new Dimension(50, 50));
@@ -640,5 +640,10 @@ public class DesktopView implements View {
     @Override
     public void stopTimer() {
         timer.stop();
+    }
+
+    @Override
+    public boolean isIconNonNull(int row, int column) {
+        return cells[row][column].getIcon() != null;
     }
 }

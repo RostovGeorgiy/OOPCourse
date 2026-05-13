@@ -1,7 +1,5 @@
 package rostov.minesweeper.model;
 
-import rostov.minesweeper.Difficulty;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -42,13 +40,15 @@ public interface Model {
 
     String readScores(Difficulty difficulty) throws Exception;
 
-    int getMaxBoardDimension();
+    int getMaxRowsAmount();
+
+    int getMaxColumnsAmount();
 
     void disableBoard();
 
     boolean isEnabled(int row, int column);
 
-    ImageIcon getIcon(int row, int column);
-
     Difficulty getDifficulty(String difficultyName);
+
+    void addDifficulties();
 }
