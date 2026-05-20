@@ -279,7 +279,7 @@ public class DesktopView implements View {
                     return;
                 }
 
-                if ((presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) || (minesAmount >= rowsAmount * columnsAmount || minesAmount < 1)) {
+                if ((presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) || (minesAmount >= rowsAmount * columnsAmount - 1 || minesAmount < 1)) {
                     showInputErrorMessage();
 
                     rowsTextField.setText("9");
@@ -494,7 +494,7 @@ public class DesktopView implements View {
 
     @Override
     public void showInputErrorMessage() {
-        JOptionPane.showMessageDialog(frame, "Incorrect input values: too few/too many mines or 0/negative values. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Incorrect input values: too few/too many mines or 0/negative values. Allowed mine amounts: 1 - (total cells - 2). Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
