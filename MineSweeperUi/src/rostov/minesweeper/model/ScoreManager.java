@@ -44,10 +44,10 @@ public class ScoreManager {
             writer.print(gameScore > 0 ? gameScore : 1);
         }
 
-        topScores(scoresFilePath);
+        sortTopScores(scoresFilePath);
     }
 
-    private static void topScores(String scoresFilePath) throws Exception {
+    private static void sortTopScores(String scoresFilePath) throws Exception {
         try (BufferedReader reader = new BufferedReader(new FileReader(scoresFilePath))) {
             ArrayList<ScoreRecord> scores = new ArrayList<>();
             String line;

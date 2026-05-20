@@ -4,6 +4,7 @@ import rostov.minesweeper.model.Difficulty;
 import rostov.minesweeper.gui.View;
 import rostov.minesweeper.model.Model;
 
+import javax.swing.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
@@ -21,14 +22,25 @@ public class Presenter {
     private Difficulty difficulty;
 
     public Presenter(Model model, View view) {
-        this.model = Objects.requireNonNull(model, "Model must not be null.");
-        this.view = Objects.requireNonNull(view, "View must not be null.");
+        this.view = Objects.requireNonNull(view, () -> {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "View must not be null.",
+                    "View error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return "View must not be null.";
+        });
+
+        this.model = Objects.requireNonNull(model, () -> {
+            view.showError("Model must not be null.");
+            return "Model must not be null.";
+        });
 
         view.setPresenter(this);
     }
 
     public void start() {
-        model.addDifficulties();
         view.start();
     }
 

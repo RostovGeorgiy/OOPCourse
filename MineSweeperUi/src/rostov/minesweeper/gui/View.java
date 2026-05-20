@@ -33,7 +33,7 @@ public interface View {
 
     void showWinMessage();
 
-    void showError(String exceptionMessage);
+    String showError(String exceptionMessage);
 
     void showHighlightedMine(int row, int column);
 

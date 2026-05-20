@@ -3,7 +3,6 @@ package rostov.minesweeper.gui;
 import rostov.minesweeper.presenter.Presenter;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -53,10 +52,18 @@ public class DesktopView implements View {
     private boolean isStarted;
 
     public void start() {
-        Objects.requireNonNull(presenter, "Presenter must not be null.");
+        Objects.requireNonNull(presenter, () -> {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Presenter must not be null.",
+                    "Presenter error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return "Presenter must not be null.";
+        });
 
         if (isStarted) {
-            throw new IllegalStateException("Start method was already called.");
+            showError("Start method was already called.");
         }
 
         isStarted = true;
@@ -77,16 +84,15 @@ public class DesktopView implements View {
 
             frame = new JFrame("Minesweeper");
             frame.setIconImage(minesweeperIcon.getImage());
-            frame.setSize(1000, 950);
             frame.setLocationRelativeTo(null);
             frame.setLayout(new GridBagLayout());
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            frame.setMinimumSize(new Dimension(600, 900));
 
             JLabel rowsLabel = new JLabel("Input amount of rows:");
             rowsLabel.setVisible(false);
 
             JTextField rowsTextField = new JTextField(2);
+            rowsTextField.setMinimumSize(new Dimension(50, 20));
             rowsTextField.setText(String.valueOf(rowsAmount));
             rowsTextField.setVisible(false);
 
@@ -105,6 +111,7 @@ public class DesktopView implements View {
 
             JTextField columnsTextField = new JTextField(2);
             columnsTextField.setText(String.valueOf(columnsAmount));
+            columnsTextField.setMinimumSize(new Dimension(50, 20));
             columnsTextField.setVisible(false);
 
             ((AbstractDocument) columnsTextField.getDocument()).setDocumentFilter(new DocumentFilter() {
@@ -121,6 +128,7 @@ public class DesktopView implements View {
             minesLabel.setVisible(false);
 
             JTextField minesTextField = new JTextField(2);
+            minesTextField.setMinimumSize(new Dimension(50, 20));
             minesTextField.setText(String.valueOf(minesAmount));
             minesTextField.setVisible(false);
 
@@ -158,7 +166,7 @@ public class DesktopView implements View {
             minesTextFieldConstraints.gridwidth = GridBagConstraints.REMAINDER;
 
             JPanel optionsPanel = new JPanel(new GridBagLayout());
-            optionsPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+            optionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 0, 15));
 
             optionsPanel.add(rowsLabel, rowLabelConstraints);
             optionsPanel.add(rowsTextField, rowTextFieldConstraints);
@@ -277,6 +285,7 @@ public class DesktopView implements View {
                     rowsTextField.setText("9");
                     columnsTextField.setText("9");
                     minesTextField.setText("10");
+                    remainingFlagsLabel.setText("10");
 
                     rowsAmount = 9;
                     columnsAmount = 9;
@@ -287,6 +296,7 @@ public class DesktopView implements View {
                 remainingFlagsLabel.setText("" + remainingFlags);
 
                 minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
+                minesweeperBoard.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
                 if (difficulty.equals("custom")) {
                     presenter.startCustomGame(rowsAmount, columnsAmount, minesAmount);
@@ -383,6 +393,8 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(false);
                 minesLabel.setVisible(false);
+
+                remainingFlagsLabel.setText("10");
             });
 
             intermediateDifficultyButton.addActionListener(_ -> {
@@ -396,6 +408,8 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(false);
                 minesLabel.setVisible(false);
+
+                remainingFlagsLabel.setText("40");
             });
 
             expertDifficultyButton.addActionListener(_ -> {
@@ -409,6 +423,8 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(false);
                 minesLabel.setVisible(false);
+
+                remainingFlagsLabel.setText("99");
             });
 
             customDifficultyButton.addActionListener(_ -> {
@@ -422,6 +438,9 @@ public class DesktopView implements View {
 
                 minesTextField.setVisible(true);
                 minesLabel.setVisible(true);
+
+                frame.pack();
+                frame.setLocationRelativeTo(null);
             });
 
             optionsMenu.add(beginnerDifficultyButton);
@@ -460,6 +479,9 @@ public class DesktopView implements View {
                 }
             });
 
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+
             frame.setVisible(true);
         });
 
@@ -482,7 +504,15 @@ public class DesktopView implements View {
 
     @Override
     public void setPresenter(Presenter presenter) {
-        this.presenter = Objects.requireNonNull(presenter, "Presenter must not be null.");
+        this.presenter = Objects.requireNonNull(presenter, () -> {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Presenter must not be null.",
+                    "Presenter error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return "Presenter must not be null.";
+        });
     }
 
     @Override
@@ -519,15 +549,15 @@ public class DesktopView implements View {
 
             minesweeperBoard = new JPanel();
             minesweeperBoard.setLayout(new GridLayout(boardRowsAmount, boardColumnsAmount));
-            minesweeperBoard.setMaximumSize(new Dimension(550, 550));
 
+            minesweeperBoard.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
             frame.add(minesweeperBoard, gamePanelConstraints);
 
             for (int row = 0; row < boardRowsAmount; ++row) {
                 for (int column = 0; column < boardColumnsAmount; ++column) {
                     cells[row][column] = new JButton("");
 
-                   if ((boardColumnsAmount >= 14) || (boardRowsAmount >= 14)) {
+                    if ((boardColumnsAmount >= 14) || (boardRowsAmount >= 14)) {
                         cells[row][column].setPreferredSize(new Dimension(30, 30));
                     } else {
                         cells[row][column].setPreferredSize(new Dimension(50, 50));
@@ -547,6 +577,10 @@ public class DesktopView implements View {
 
             frame.revalidate();
             frame.repaint();
+
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+
 
             stopTimer();
             timerLabel.setText("0");
@@ -628,8 +662,9 @@ public class DesktopView implements View {
     }
 
     @Override
-    public void showError(String exceptionMessage) {
+    public String showError(String exceptionMessage) {
         SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(frame, exceptionMessage, "Error", JOptionPane.ERROR_MESSAGE));
+        return exceptionMessage;
     }
 
     @Override

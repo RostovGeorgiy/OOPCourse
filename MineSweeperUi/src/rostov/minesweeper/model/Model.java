@@ -1,6 +1,5 @@
 package rostov.minesweeper.model;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -49,6 +48,4 @@ public interface Model {
     boolean isEnabled(int row, int column);
 
     Difficulty getDifficulty(String difficultyName);
-
-    void addDifficulties();
 }
