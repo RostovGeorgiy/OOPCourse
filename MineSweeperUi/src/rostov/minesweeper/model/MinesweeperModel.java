@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class MinesweeperModel implements Model {
     private static final int MAX_COLUMNS_AMOUNT = 30;
-    private static final int MAX_ROWS_AMOUNT = 17;
+    private static final int MAX_ROWS_AMOUNT = 18;
 
     private static List<Difficulty> difficulties = new ArrayList<>();
 
@@ -48,7 +48,6 @@ public class MinesweeperModel implements Model {
             }
 
             board[row][column].setMine(true);
-
             minesPlacedCounter++;
         }
     }

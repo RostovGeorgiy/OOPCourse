@@ -84,7 +84,6 @@ public class DesktopView implements View {
 
             frame = new JFrame("Minesweeper");
             frame.setIconImage(minesweeperIcon.getImage());
-            frame.setLocationRelativeTo(null);
             frame.setLayout(new GridBagLayout());
             frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -273,14 +272,16 @@ public class DesktopView implements View {
                             rowsAmount = Integer.parseInt(rowsTextField.getText());
                             columnsAmount = Integer.parseInt(columnsTextField.getText());
                             minesAmount = Integer.parseInt(minesTextField.getText());
+                            remainingFlags = minesAmount;
+                            remainingFlagsLabel.setText(String.valueOf(remainingFlags));
                         }
                     }
                 } catch (Exception e) {
                     return;
                 }
 
-                if ((presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) || (minesAmount >= rowsAmount * columnsAmount - 1 || minesAmount < 1)) {
-                    showInputErrorMessage();
+                if ((presenter.isIncorrectBoardSize(rowsAmount, columnsAmount)) || presenter.isIncorrectMinesAmount(minesAmount, rowsAmount, columnsAmount)) {
+                    showMinesAmountErrorMessage();
 
                     rowsTextField.setText("9");
                     columnsTextField.setText("9");
@@ -290,10 +291,9 @@ public class DesktopView implements View {
                     rowsAmount = 9;
                     columnsAmount = 9;
                     minesAmount = 10;
+                    remainingFlags = minesAmount;
+                    remainingFlagsLabel.setText(String.valueOf(remainingFlags));
                 }
-
-                remainingFlags = minesAmount;
-                remainingFlagsLabel.setText("" + remainingFlags);
 
                 minesweeperBoard.setLayout(new GridLayout(rowsAmount, columnsAmount));
                 minesweeperBoard.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -305,6 +305,8 @@ public class DesktopView implements View {
                 }
 
                 presenter.startGame(difficulty);
+                remainingFlags = minesAmount;
+                remainingFlagsLabel.setText(String.valueOf(remainingFlags));
             };
 
             startGameButton.addActionListener(startGameListener);
@@ -440,7 +442,6 @@ public class DesktopView implements View {
                 minesLabel.setVisible(true);
 
                 frame.pack();
-                frame.setLocationRelativeTo(null);
             });
 
             optionsMenu.add(beginnerDifficultyButton);
@@ -487,14 +488,13 @@ public class DesktopView implements View {
 
     }
 
-    @Override
     public ImageIcon setIconPath(String iconPath) {
         return new ImageIcon(Objects.requireNonNull(getClass().getResource(iconPath)));
     }
 
     @Override
-    public void showInputErrorMessage() {
-        JOptionPane.showMessageDialog(frame, "Incorrect input values: too few/too many mines or 0/negative values. Allowed mine amounts: 1 - (total cells - 2). Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
+    public void showMinesAmountErrorMessage() {
+        JOptionPane.showMessageDialog(frame, "Incorrect mines amount: too few/too many mines or 0/negative values. Allowed mine amounts: minesAmount > rowsAmount * columnsAmount / 10 and minesAmount < rowsAmount * columnsAmount / 2. Default values(beginner difficulty) are used.", "Input values error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
@@ -579,8 +579,6 @@ public class DesktopView implements View {
             frame.repaint();
 
             frame.pack();
-            frame.setLocationRelativeTo(null);
-
 
             stopTimer();
             timerLabel.setText("0");
@@ -662,9 +660,8 @@ public class DesktopView implements View {
     }
 
     @Override
-    public String showError(String exceptionMessage) {
+    public void showError(String exceptionMessage) {
         SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(frame, exceptionMessage, "Error", JOptionPane.ERROR_MESSAGE));
-        return exceptionMessage;
     }
 
     @Override
@@ -680,5 +677,15 @@ public class DesktopView implements View {
     @Override
     public boolean isIconNonNull(int row, int column) {
         return cells[row][column].getIcon() != null;
+    }
+
+    @Override
+    public void centerFrame() {
+        SwingUtilities.invokeLater(() -> frame.setLocationRelativeTo(null));
+    }
+
+    @Override
+    public void setMinesAmount(int minesAmount) {
+        this.minesAmount = minesAmount;
     }
 }

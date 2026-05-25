@@ -17,6 +17,8 @@ public class Presenter {
     private int columnsAmount;
     private int minesAmount;
 
+    private boolean isFirstStart = true;
+
     private boolean isFirstClick = true;
 
     private Difficulty difficulty;
@@ -98,6 +100,10 @@ public class Presenter {
 
         if (nearbyFlags == nearbyMines) {
             revealNearbyCells(row, column);
+
+            if (model.checkWin()) {
+                view.showWinMessage();
+            }
         }
     }
 
@@ -164,6 +170,13 @@ public class Presenter {
         isFirstClick = true;
 
         view.resetBoard(model.getRowsAmount(), model.getColumnsAmount());
+
+        view.setMinesAmount(minesAmount);
+
+        if (isFirstStart) {
+            view.centerFrame();
+            isFirstStart = false;
+        }
     }
 
     public void startCustomGame(int rowsAmount, int columnsAmount, int minesAmount) {
@@ -176,6 +189,11 @@ public class Presenter {
         isFirstClick = true;
 
         view.resetBoard(model.getRowsAmount(), model.getColumnsAmount());
+
+        if (isFirstStart) {
+            view.centerFrame();
+            isFirstStart = false;
+        }
     }
 
     public void about() {
@@ -208,5 +226,9 @@ public class Presenter {
         } catch (Exception e) {
             view.showError("Error: " + e.getMessage());
         }
+    }
+
+    public boolean isIncorrectMinesAmount(int minesAmount, int rowsAmount, int columnsAmount) {
+        return (minesAmount < rowsAmount * columnsAmount / 10) || (minesAmount > rowsAmount * columnsAmount / 2);
     }
 }

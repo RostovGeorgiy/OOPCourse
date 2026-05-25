@@ -2,16 +2,13 @@ package rostov.minesweeper.gui;
 
 import rostov.minesweeper.presenter.Presenter;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
 public interface View {
     void start();
 
-    ImageIcon setIconPath(String iconPath);
-
-    void showInputErrorMessage();
+    void showMinesAmountErrorMessage();
 
     void showBoardSizeErrorMessage();
 
@@ -33,11 +30,15 @@ public interface View {
 
     void showWinMessage();
 
-    String showError(String exceptionMessage);
+    void showError(String exceptionMessage);
 
     void showHighlightedMine(int row, int column);
 
     void stopTimer();
 
     boolean isIconNonNull(int row, int column);
+
+    void centerFrame();
+
+    void setMinesAmount(int minesAmount);
 }
